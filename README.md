@@ -7,6 +7,8 @@ Throughout these modules I used a mixture of object-oriented programming and reg
 
 
 
+
+
 #### References
 
 Woensdregt, M., Kirby, S., Cummins, C. & Smith, K. (2016). Modelling the co-development of word learning and perspective-taking. Proceedings of 38th Annual Meeting of the Cognitive Science Society.

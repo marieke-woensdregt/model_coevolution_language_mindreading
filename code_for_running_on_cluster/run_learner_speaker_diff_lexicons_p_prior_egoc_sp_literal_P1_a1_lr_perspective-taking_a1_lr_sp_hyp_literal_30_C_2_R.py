@@ -181,27 +181,10 @@ if __name__ == "__main__":
 
 
         multi_run_log_posterior_matrix = all_results_dict['multi_run_log_posterior_matrix']
-        # print 
-        # print 
-        # print "multi_run_log_posterior_matrix is:"
-        # print multi_run_log_posterior_matrix
-        # print "multi_run_log_posterior_matrix.shape is:"
-        # print multi_run_log_posterior_matrix.shape
-
-
 
         mean_final_posteriors = measur.calc_mean_of_final_posteriors(multi_run_log_posterior_matrix)
-        # print 
-        # print 
-        # print "mean_final_posteriors is:"
-        # print mean_final_posteriors
-
 
         std_final_posteriors = measur.calc_std_of_final_posteriors(multi_run_log_posterior_matrix)
-        # print 
-        # print 
-        # print "std_final_posteriors is:"
-        # print std_final_posteriors
 
 
         mean_std_final_posteriors_dict = {'mean_final_posteriors':mean_final_posteriors,

@@ -11,6 +11,7 @@ import prior
 
 
 
+
 def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
     """
     :param n_meanings: integer specifying number of meanings ('objects') in the lexicon
@@ -67,6 +68,7 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
     speaker_lexicon = lex.Lexicon(speaker_lex_type, n_meanings, n_signals, specified_lexicon=speaker_lexicon_matrix)
 
 
+
     print "This simulation will contain:"
     print str(n_runs)+' runs'
     print 'with'
@@ -110,7 +112,7 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
 
         perspective_prior = prior.create_perspective_prior(perspective_hyps, lexicon_hyps, perspective_prior_type, learner_perspective, perspective_prior_strength)
         lexicon_prior = prior.create_lexicon_prior(lexicon_hyps, lexicon_prior_type, lexicon_prior_constant, error)
-        composite_log_priors = prior.list_composite_log_priors('no_p_distinction', 1, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior) # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner
+        composite_log_priors = prior.list_composite_log_priors('no_p_distinction', 1, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior) # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner!
 
         learner_lexicon = lex.Lexicon(learner_lex_type, n_meanings, n_signals)
 
@@ -121,7 +123,6 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
         elif pragmatic_level_learner == 'prag':
             learner = PragmaticAgent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, learner_perspective, sal_alpha, learner_lexicon, learner_learning_type, pragmatic_level_sp_hyp_lr, pragmatic_level_learner, optimality_alpha_learner, extra_error)
 
-        if r == 0:
 
         if pragmatic_level_speaker == 'literal':
             speaker = Agent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, speaker_perspective, sal_alpha, speaker_lexicon, speaker_learning_type)

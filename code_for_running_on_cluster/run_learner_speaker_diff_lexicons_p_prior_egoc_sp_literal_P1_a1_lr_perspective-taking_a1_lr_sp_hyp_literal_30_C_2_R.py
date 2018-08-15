@@ -20,8 +20,8 @@ speaker_lex_index = int(sys.argv[1])-1 #NOTE: first argument in sys.argv list is
 #######################################################################################################################
 # 1. THE PARAMETERS:
 
-# 1.1: Set the path to the results_directory on your cluster account where you want the results to be stored:
-results_directory = '/exports/eddie/scratch/s1370641/'
+# 1.1: Set the path to the results_directory on your cluster account where you want the results to be stored if you don't want the results to be stored in the folder from which you're running the array job:
+# results_directory = '/exports/eddie/scratch/s1370641/'
 
 
 

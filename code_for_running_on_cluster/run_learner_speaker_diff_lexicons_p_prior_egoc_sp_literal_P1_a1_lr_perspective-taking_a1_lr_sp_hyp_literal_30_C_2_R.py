@@ -21,7 +21,7 @@ speaker_lex_index = int(sys.argv[1])-1 #NOTE: first argument in sys.argv list is
 # 1. THE PARAMETERS:
 
 # 1.1: Set the path to the results_directory on your cluster account where you want the results to be stored if you don't want the results to be stored in the folder from which you're running the array job:
-# results_directory = '/exports/eddie/scratch/s1370641/'
+results_directory = ''
 
 
 
@@ -223,12 +223,12 @@ if __name__ == "__main__":
             file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_C'+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
 
 
-        pickle_file_title_all_results = results_directory + '/Results_' + file_title
+        pickle_file_title_all_results = results_directory + 'Results_' + file_title
 
         saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
 
 
-        pickle_file_title_mean_std_final_posteriors = results_directory + '/Mean_Std_Final_Post_' + file_title
+        pickle_file_title_mean_std_final_posteriors = results_directory + 'Mean_Std_Final_Post_' + file_title
 
         saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
 

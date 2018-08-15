@@ -93,9 +93,12 @@ perspective_probs_string = saveresults.convert_array_to_string(perspective_probs
 
 
 learning_types = ['map', 'sample'] # The types of learning that the learners can do
-learning_type_probs = np.array([0., 1.]) # The proportions with which the different learning types will be present in the population
+learning_type_probs = np.array([0., 1.]) # The ratios with which the different learning types will be present in the population
 learning_type_probs_string = saveresults.convert_array_to_string(learning_type_probs) # Turns the learning type probs into a string in order to add it to file names
-learning_type_string = learning_types[np.where(learning_type_probs==1.)[0]]
+if learning_type_probs[0] == 1.:
+    learning_type_string = learning_types[0]
+elif learning_type_probs[1] == 1.:
+    learning_type_string = learning_types[1]
 
 
 # 1.4: The parameters that determine the attributes of the learner:
@@ -472,7 +475,7 @@ def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_
     lexicon_prior = prior.create_lexicon_prior(lexicon_hyps, lexicon_prior_type, lexicon_prior_constant, error)
 
     ## 3.3) And finally the full composite prior matrix is created using the separate lexicon_prior and perspective_prior, and following the configuration of hypothesis_space
-    composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_prior, lexicon_prior, pop_size)
+    composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior, pop_size)
 
     # 4) Then the population is created:
     ## 4.1) First the population's lexicons are determined:
@@ -528,13 +531,13 @@ def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_
 
         learner_lexicon = lex.Lexicon(learner_lex_type, n_meanings, n_signals)
         if learner_type == 'perspective_unknown':
-            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_prior, lexicon_prior_fixed, pop_size)
+            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior_fixed, pop_size)
             # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner!
         elif learner_type == 'lexicon_unknown':
-            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_prior_fixed, lexicon_prior, pop_size)
+            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_fixed, lexicon_prior, pop_size)
             # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner!
         elif learner_type == 'both_unknown':
-            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_prior, lexicon_prior, pop_size) # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner!
+            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior, pop_size) # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner!
 
         learner = pop.DistinctionAgent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, learner_perspective, sal_alpha, learner_lexicon, learner_learning_type, pop_size)
 

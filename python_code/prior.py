@@ -182,16 +182,18 @@ def list_composite_log_priors(agent_type, pop_size, hypothesis_space, perspectiv
 
 
 
-def list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_prior, lexicon_prior, n_speakers):
+def list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior, n_speakers):
     """
     :param hypothesis_space: The full space of composite hypotheses (2D numpy matrix)
+    :param perspective_hyps: 1D numpy array containing floats which specify the possible perspectives
+    :param lexicon_hyps: 3D numpy array containing all lexicon hypotheses that are considered by the learner
     :param perspective_prior: The prior probability distribution over perspective hypotheses (1D numpy array)
     :param lexicon_prior: The prior probability distribution over lexicon hypotheses (1D numpy array)
     :param n_speakers: The number of speakers
     :return: A 1D numpy array that contains the LOG prior for each composite hypothesis (i.e. log(perspective_prior*lexicon_prior))
     """
-    n_perspective_combinations = np.power(len(params.perspective_hyps), n_speakers)
-    n_composite_hyp_combinations = n_perspective_combinations*len(params.lexicon_hyps)
+    n_perspective_combinations = np.power(len(perspective_hyps), n_speakers)
+    n_composite_hyp_combinations = n_perspective_combinations*len(lexicon_hyps)
     log_prior_distribution = np.zeros(n_composite_hyp_combinations)
     counter = 0
     for i in range(len(hypothesis_space)):

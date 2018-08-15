@@ -9,6 +9,7 @@ import time
 
 import hypspace
 import lex
+import plots
 import pop
 import prior
 import saveresults
@@ -67,7 +68,7 @@ elif n_meanings == 4:
 
 
 error = 0.05  # The error term on production
-error_string = convert_array_to_string(error)
+error_string = saveresults.convert_array_to_string(error)
 extra_error = True # Determines whether the error specified above gets added on top AFTER the pragmatic speaker has calculated its production probabilities by maximising the utility to the listener.
 
 # 2.3: The parameters that determine the make-up of the population:
@@ -117,10 +118,10 @@ elif which_lexicon_hyps == 'only_optimal':
 
 
 if agent_type == 'no_p_distinction':
-    hypothesis_space = list_hypothesis_space(perspective_hyps, lexicon_hyps) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
+    hypothesis_space = hypspace.list_hypothesis_space(perspective_hyps, lexicon_hyps) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
 
 elif agent_type == 'p_distinction':
-    hypothesis_space = list_hypothesis_space_with_speaker_distinction(perspective_hyps, lexicon_hyps, pop_size) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
+    hypothesis_space = hypspace.list_hypothesis_space_with_speaker_distinction(perspective_hyps, lexicon_hyps, pop_size) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
 
 
 
@@ -134,8 +135,16 @@ lexicon_probs = np.array([0. for x in range(len(lexicon_hyps) - 1)] + [1.]) # Th
 
 perspectives = np.array([0., 1.]) # The different perspectives that agents can have
 perspective_probs = np.array([0., 1.]) # The ratios with which the different perspectives will be present in the population
-perspective_probs_string = convert_array_to_string(perspective_probs) # Turns the perspective probs into a string in order to add it to file names
+perspective_probs_string = saveresults.convert_array_to_string(perspective_probs) # Turns the perspective probs into a string in order to add it to file names
 
+
+learning_types = ['map', 'sample'] # The types of learning that the learners can do
+learning_type_probs = np.array([0., 1.]) # The ratios with which the different learning types will be present in the population
+learning_type_probs_string = saveresults.convert_array_to_string(learning_type_probs) # Turns the learning type probs into a string in order to add it to file names
+if learning_type_probs[0] == 1.:
+    learning_type_string = learning_types[0]
+elif learning_type_probs[1] == 1.:
+    learning_type_string = learning_types[1]
 
 
 
@@ -144,13 +153,13 @@ perspective_probs_string = convert_array_to_string(perspective_probs) # Turns th
 
 perspective_prior_type = 'egocentric' # This can be set to either 'neutral', 'egocentric', 'same_as_lexicon' or 'zero_order_tom'
 perspective_prior_strength = 0.9 # The strength of the egocentric prior (only used if the perspective_prior_type is set to 'egocentric')
-perspective_prior_strength_string = convert_array_to_string(perspective_prior_strength)
+perspective_prior_strength_string = saveresults.convert_array_to_string(perspective_prior_strength)
 
 
 
 lexicon_prior_type = 'neutral' # This can be set to either 'neutral', 'ambiguous_fixed', 'half_ambiguous_fixed', 'expressivity_bias' or 'compressibility_bias'
 lexicon_prior_constant = 0.0 # Determines the strength of the lexicon bias, with small c creating a STRONG prior and large c creating a WEAK prior. (And with c = 1000 creating an almost uniform prior.)
-lexicon_prior_constant_string = convert_array_to_string(lexicon_prior_constant)
+lexicon_prior_constant_string = saveresults.convert_array_to_string(lexicon_prior_constant)
 
 n_utterances = 1  # This parameter determines how many signals the learner gets to observe in each context
 n_contexts = 12  # The number of contexts that the learner gets to see. If context_generation = 'optimal' n_contexts for n_meanings = 2 can be anything in the table of 4 (e.g. 20, 40, 60, 80, 100, etc.); for n_meanings = 3 anything in the table of 12 (e.g. 12, 36, 60, 84, 108, etc.); and for n_meanings = 4 anything in the table of 48 (e.g. 48, 96, 144, 192 etc.).
@@ -508,7 +517,7 @@ def multi_runs_iteration(n_meanings, n_signals, n_runs, n_iterations, report_eve
             ## 1.1.2) Then the lexicon prior is created:
             lexicon_prior = prior.create_lexicon_prior(lexicon_hyps, lexicon_prior_type, lexicon_prior_constant, error)
             ## 1.1.3) And finally the full composite prior matrix is created using the separate lexicon_prior and perspective_prior, and following the configuration of hypothesis_space
-            composite_log_prior = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_prior, lexicon_prior, pop_size)
+            composite_log_prior = prior.list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior, pop_size)
 
             # 1.2) Then the population is created:
 
@@ -626,147 +635,144 @@ def measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspect
 
 
 if __name__ == "__main__":
-    if n_runs > 0 and run_type == 'iter':
+
+    t0 = time.clock()
+
+    all_results_dict = multi_runs_iteration(n_meanings, n_signals, n_runs, n_iterations, report_every_r, report_every_i, turnover_type, selection_type, selection_weighting, communication_type, ca_measure_type, n_interactions, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, pop_size, teacher_type, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, hypothesis_space, perspective_hyps, lexicon_hyps, learner_perspective, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, recording)
 
 
-        t0 = time.clock()
-
-        all_results_dict = multi_runs_iteration(n_meanings, n_signals, n_runs, n_iterations, report_every_r, report_every_i, turnover_type, selection_type, selection_weighting, communication_type, ca_measure_type, n_interactions, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, pop_size, teacher_type, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, hypothesis_space, perspective_hyps, lexicon_hyps, learner_perspective, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, recording)
-
-
-        run_simulation_time = time.clock()-t0
-        print 
-        print 'run_simulation_time is:'
-        print str((run_simulation_time/60))+" m"
+    run_simulation_time = time.clock()-t0
+    print
+    print 'run_simulation_time is:'
+    print str((run_simulation_time/60))+" m"
 
 
-        t1 = time.clock()
+    t1 = time.clock()
 
 
-        if recording == 'everything':
-            multi_run_log_posteriors_per_agent_matrix = all_results_dict['multi_run_log_posteriors_per_agent_matrix']
-            # print "np.exp(multi_run_log_posteriors_per_agent_matrix) is:"
-            # print np.exp(multi_run_log_posteriors_per_agent_matrix)
-            print "multi_run_log_posteriors_per_agent_matrix.shape is:"
-            print multi_run_log_posteriors_per_agent_matrix.shape
+    if recording == 'everything':
+        multi_run_log_posteriors_per_agent_matrix = all_results_dict['multi_run_log_posteriors_per_agent_matrix']
+        # print "np.exp(multi_run_log_posteriors_per_agent_matrix) is:"
+        # print np.exp(multi_run_log_posteriors_per_agent_matrix)
+        print "multi_run_log_posteriors_per_agent_matrix.shape is:"
+        print multi_run_log_posteriors_per_agent_matrix.shape
 
-            multi_run_log_posteriors_final_agent_matrix = all_results_dict['multi_run_log_posteriors_final_agent_matrix']
-            # print "np.exp(multi_run_log_posteriors_final_agent_matrix) is:"
-            # print np.exp(multi_run_log_posteriors_final_agent_matrix)
-            print "multi_run_log_posteriors_final_agent_matrix.shape is:"
-            print multi_run_log_posteriors_final_agent_matrix.shape
+        multi_run_log_posteriors_final_agent_matrix = all_results_dict['multi_run_log_posteriors_final_agent_matrix']
+        # print "np.exp(multi_run_log_posteriors_final_agent_matrix) is:"
+        # print np.exp(multi_run_log_posteriors_final_agent_matrix)
+        print "multi_run_log_posteriors_final_agent_matrix.shape is:"
+        print multi_run_log_posteriors_final_agent_matrix.shape
 
-            multi_run_pop_lexicons_matrix = all_results_dict['multi_run_pop_lexicons_matrix']
-            # print "multi_run_pop_lexicons_matrix is:"
-            # print multi_run_pop_lexicons_matrix
-            print "multi_run_pop_lexicons_matrix.shape is:"
-            print multi_run_pop_lexicons_matrix.shape
+        multi_run_pop_lexicons_matrix = all_results_dict['multi_run_pop_lexicons_matrix']
+        # print "multi_run_pop_lexicons_matrix is:"
+        # print multi_run_pop_lexicons_matrix
+        print "multi_run_pop_lexicons_matrix.shape is:"
+        print multi_run_pop_lexicons_matrix.shape
 
-            multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix = all_results_dict['multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix']
-            # print "np.exp(multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix) is:"
-            # print np.exp(multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix)
-            print "multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix.shape is:"
-            print multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix.shape
-
-
-        multi_run_selected_hyps_per_generation_matrix = all_results_dict['multi_run_selected_hyps_per_generation_matrix']
-        # print "multi_run_selected_hyps_per_generation_matrix is:"
-        # print multi_run_selected_hyps_per_generation_matrix
-        print "multi_run_selected_hyps_per_generation_matrix.shape is:"
-        print multi_run_selected_hyps_per_generation_matrix.shape
-
-        multi_run_avg_fitness_matrix = all_results_dict['multi_run_avg_fitness_matrix']
-        # print "multi_run_avg_fitness_matrix is:"
-        # print multi_run_avg_fitness_matrix
-        print "multi_run_avg_fitness_matrix.shape is:"
-        print multi_run_avg_fitness_matrix.shape
-
-        multi_run_parent_probs_matrix = all_results_dict['multi_run_parent_probs_matrix']
-        # print "multi_run_parent_probs_matrix is:"
-        # print multi_run_parent_probs_matrix
-        print "multi_run_parent_probs_matrix.shape is:"
-        print multi_run_parent_probs_matrix.shape
-
-        multi_run_selected_parent_indices_matrix = all_results_dict['multi_run_selected_parent_indices_matrix']
-        # print "multi_run_selected_parent_indices_matrix is:"
-        # print multi_run_selected_parent_indices_matrix
-        print "multi_run_selected_parent_indices_matrix.shape is:"
-        print multi_run_selected_parent_indices_matrix.shape
-
-        multi_run_parent_lex_indices_matrix = all_results_dict['multi_run_parent_lex_indices_matrix']
-        # print "multi_run_parent_lex_indices_matrix is:"
-        # print multi_run_parent_lex_indices_matrix
-        print "multi_run_parent_lex_indices_matrix.shape is:"
-        print multi_run_parent_lex_indices_matrix.shape
+        multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix = all_results_dict['multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix']
+        # print "np.exp(multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix) is:"
+        # print np.exp(multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix)
+        print "multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix.shape is:"
+        print multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix.shape
 
 
-        multi_run_proportion_max_offspring_single_parent = np.zeros((n_runs, n_iterations))
-        for r in range(n_runs):
-            for i in range(n_iterations):
-                parent_indices = multi_run_selected_parent_indices_matrix[r][i]
-                parent_index_counts = np.bincount(parent_indices.astype(int))
-                max_offspring_single_parent = np.amax(parent_index_counts)
-                proportion_max_offspring_single_parent = np.divide(max_offspring_single_parent.astype(float), float(pop_size))
-                multi_run_proportion_max_offspring_single_parent[r][i] = proportion_max_offspring_single_parent
-        print ''
-        print ''
-        print "multi_run_proportion_max_offspring_single_parent is:"
-        print multi_run_proportion_max_offspring_single_parent
-        print "multi_run_proportion_max_offspring_single_parent.shape is:"
-        print multi_run_proportion_max_offspring_single_parent.shape
+    multi_run_selected_hyps_per_generation_matrix = all_results_dict['multi_run_selected_hyps_per_generation_matrix']
+    # print "multi_run_selected_hyps_per_generation_matrix is:"
+    # print multi_run_selected_hyps_per_generation_matrix
+    print "multi_run_selected_hyps_per_generation_matrix.shape is:"
+    print multi_run_selected_hyps_per_generation_matrix.shape
+
+    multi_run_avg_fitness_matrix = all_results_dict['multi_run_avg_fitness_matrix']
+    # print "multi_run_avg_fitness_matrix is:"
+    # print multi_run_avg_fitness_matrix
+    print "multi_run_avg_fitness_matrix.shape is:"
+    print multi_run_avg_fitness_matrix.shape
+
+    multi_run_parent_probs_matrix = all_results_dict['multi_run_parent_probs_matrix']
+    # print "multi_run_parent_probs_matrix is:"
+    # print multi_run_parent_probs_matrix
+    print "multi_run_parent_probs_matrix.shape is:"
+    print multi_run_parent_probs_matrix.shape
+
+    multi_run_selected_parent_indices_matrix = all_results_dict['multi_run_selected_parent_indices_matrix']
+    # print "multi_run_selected_parent_indices_matrix is:"
+    # print multi_run_selected_parent_indices_matrix
+    print "multi_run_selected_parent_indices_matrix.shape is:"
+    print multi_run_selected_parent_indices_matrix.shape
+
+    multi_run_parent_lex_indices_matrix = all_results_dict['multi_run_parent_lex_indices_matrix']
+    # print "multi_run_parent_lex_indices_matrix is:"
+    # print multi_run_parent_lex_indices_matrix
+    print "multi_run_parent_lex_indices_matrix.shape is:"
+    print multi_run_parent_lex_indices_matrix.shape
 
 
-        calc_performance_measures_time = time.clock()-t1
-        print 
-        print 'calc_performance_measures_time is:'
-        print str((calc_performance_measures_time/60))+" m"
+    multi_run_proportion_max_offspring_single_parent = np.zeros((n_runs, n_iterations))
+    for r in range(n_runs):
+        for i in range(n_iterations):
+            parent_indices = multi_run_selected_parent_indices_matrix[r][i]
+            parent_index_counts = np.bincount(parent_indices.astype(int))
+            max_offspring_single_parent = np.amax(parent_index_counts)
+            proportion_max_offspring_single_parent = np.divide(max_offspring_single_parent.astype(float), float(pop_size))
+            multi_run_proportion_max_offspring_single_parent[r][i] = proportion_max_offspring_single_parent
+    print ''
+    print ''
+    print "multi_run_proportion_max_offspring_single_parent is:"
+    print multi_run_proportion_max_offspring_single_parent
+    print "multi_run_proportion_max_offspring_single_parent.shape is:"
+    print multi_run_proportion_max_offspring_single_parent.shape
+
+
+    calc_performance_measures_time = time.clock()-t1
+    print
+    print 'calc_performance_measures_time is:'
+    print str((calc_performance_measures_time/60))+" m"
 
 
 
 
     #############################################################################
-    # Below the actual writing of the results to text and pickle files happens:
+    # Below the results are saved in pickle files:
 
 
-    if n_runs > 0 and run_type == 'iter':
-        t2 = time.clock()
+    t2 = time.clock()
 
-        run_type_dir = 'Iteration'
-
-
-        if context_generation == 'random':
-            if selection_type == 'none' or selection_type == 'l_learning':
-                filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'p_taking':
-                filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'ca_with_parent':
-                filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+    run_type_dir = 'Iteration'
 
 
-        elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            if selection_type == 'none' or selection_type == 'l_learning':
-                filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'p_taking':
-                filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'ca_with_parent':
-                filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+    if context_generation == 'random':
+        if selection_type == 'none' or selection_type == 'l_learning':
+            filename = 'iter_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'p_taking':
+            filename = 'iter_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'ca_with_parent':
+            filename = 'iter_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+
+
+    elif context_generation == 'only_helpful' or context_generation == 'optimal':
+        if selection_type == 'none' or selection_type == 'l_learning':
+            filename = 'iter_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'p_taking':
+            filename = 'iter_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'ca_with_parent':
+            filename = 'iter_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
 
 
-        pickle_file_title_all_results = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Results_'+filename
+    pickle_file_title_all_results = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Results_'+filename
 
-        saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
-
-
-        pickle_file_title_max_offspring_single_parent = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Max_Offspring_'+filename
-
-        saveresults.write_results_to_pickle_file(pickle_file_title_max_offspring_single_parent, multi_run_proportion_max_offspring_single_parent)
+    saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
 
 
-        write_to_files_time = time.clock()-t2
-        print 
-        print 'write_to_files_time is:'
-        print str((write_to_files_time/60))+" m"
+    pickle_file_title_max_offspring_single_parent = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Max_Offspring_'+filename
+
+    saveresults.write_results_to_pickle_file(pickle_file_title_max_offspring_single_parent, multi_run_proportion_max_offspring_single_parent)
+
+
+    write_to_files_time = time.clock()-t2
+    print
+    print 'write_to_files_time is:'
+    print str((write_to_files_time/60))+" m"
 
 
 
@@ -776,75 +782,53 @@ if __name__ == "__main__":
 
 
 
-    if n_runs > 0 and run_type == 'iter':
-        t3 = time.clock()
+    t3 = time.clock()
 
 
-        selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(n_runs, n_iterations, pop_size, multi_run_selected_hyps_per_generation_matrix, argsort_informativity_per_lexicon)
+    selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(n_runs, n_iterations, pop_size, multi_run_selected_hyps_per_generation_matrix, argsort_informativity_per_lexicon)
 
 
-        hypothesis_count_proportions, yerr_scaled_selected_hyps_for_plot = calc_mean_and_conf_invs_distribution(n_runs, n_copies, lexicon_hyps, which_hyps_on_graph, min_info_indices, intermediate_info_indices, max_info_indices, n_iterations, cut_off_point, selected_hyps_new_lex_order_all_runs)
-        print ''
-        print ''
-        print "hypothesis_count_proportions are:"
-        print hypothesis_count_proportions
-        print ''
-        print "yerr_scaled_selected_hyps_for_plot is;"
-        print yerr_scaled_selected_hyps_for_plot
-
-
+    hypothesis_count_proportions, yerr_scaled_selected_hyps_for_plot = calc_mean_and_conf_invs_distribution(n_runs, n_copies, lexicon_hyps, which_hyps_on_graph, min_info_indices, intermediate_info_indices, max_info_indices, n_iterations, cut_off_point, selected_hyps_new_lex_order_all_runs)
+    print ''
+    print ''
+    print "hypothesis_count_proportions are:"
+    print hypothesis_count_proportions
+    print ''
+    print "yerr_scaled_selected_hyps_for_plot is;"
+    print yerr_scaled_selected_hyps_for_plot
 
 
 
-        #########################################################
-        # BELOW THE PLOT SHOWING THE PROPORTIONS WITH WHICH DIFFERENT HYPOTHESES ARE SELECTED OVER GENERATIONS IS GENERATED:
 
 
-        plot_file_path = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Plots/Iteration/'
-
-        if context_generation == 'random':
-            if selection_type == 'none' or selection_type == 'l_learning':
-                plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'p_taking':
-                plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'ca_with_parent':
-                plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-
-        elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            if selection_type == 'none' or selection_type == 'l_learning':
-                plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'p_taking':
-                plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
-            elif selection_type == 'ca_with_parent':
-                plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+    #########################################################
+    # BELOW THE PLOT SHOWING THE PROPORTIONS WITH WHICH DIFFERENT HYPOTHESES ARE SELECTED OVER GENERATIONS IS GENERATED:
 
 
-        def plot_lex_distribution(plot_file_path, plot_file_title, plot_title, hypothesis_count_proportions, conf_intervals, cut_off_point, text_size):
-            sns.set_style("whitegrid")
-            sns.set_palette("deep")
-            sns.set(font_scale=text_size)
-            lex_type_labels = ['Optimal', 'Partly informative', 'Uninformative']
-            ind = np.arange(len(lex_type_labels))
-            width = 0.25
-            with sns.axes_style("whitegrid"):
-                fig, ax = plt.subplots()
-                ax.bar(ind+0.125, hypothesis_count_proportions, width, yerr=conf_intervals, error_kw=dict(ecolor='black', lw=1, capsize=5, capthick=1))
-            ax.axhline((1./float(len(lex_type_labels))), color='0.6', linestyle='--')
-            ax.set_ylim(0.0, 1.0)
-            ax.set_xticks([0.25, 1.25, 2.25])
-            ax.set_xticklabels(lex_type_labels)
-            ax.set_xlabel('Language types', labelpad=10)
-            ax.set_ylabel('Proportion over generations', labelpad=10)
-            ax.set_title(plot_title, y=1.05, fontweight='bold')
-            plt.gcf().subplots_adjust(bottom=0.15, top=0.85)  # This makes room for the xlabel and title
-            plt.savefig(plot_file_path+'Plot_Prop_Hyps'+plot_file_title+'_cutoff_'+str(cut_off_point)+'.png')
-            plt.show()
+    plot_file_path = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Plots/Iteration/'
+
+    if context_generation == 'random':
+        if selection_type == 'none' or selection_type == 'l_learning':
+            plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'p_taking':
+            plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'ca_with_parent':
+            plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+
+    elif context_generation == 'only_helpful' or context_generation == 'optimal':
+        if selection_type == 'none' or selection_type == 'l_learning':
+            plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'p_taking':
+            plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_weight_'+selection_weight_string+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        elif selection_type == 'ca_with_parent':
+            plot_file_title = '_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
 
 
-        plot_title = 'Egocentric perspective prior & '+str(n_meanings)+'x'+str(n_signals)+' lexicons'
 
-        plot_lex_distribution(plot_file_path, plot_file_title, plot_title, hypothesis_count_proportions, yerr_scaled_selected_hyps_for_plot, cut_off_point, text_size=1.6)
+    plot_title = 'Egocentric perspective prior & '+str(n_meanings)+'x'+str(n_signals)+' lexicons'
+
+    plots.plot_lex_distribution(plot_file_path, plot_file_title, plot_title, hypothesis_count_proportions, yerr_scaled_selected_hyps_for_plot, cut_off_point, text_size=1.6)
 
 
 
@@ -854,19 +838,19 @@ if __name__ == "__main__":
 
 
 
-        #########################################################
-        # BELOW THE PLOT SHOWING HOW MANY OBSERVATIONS IT TAKES TO LEARN THE PERSPECTIVE OVER GENERATIONS IS GENERATED:
+    #########################################################
+    # BELOW THE PLOT SHOWING HOW MANY OBSERVATIONS IT TAKES TO LEARN THE PERSPECTIVE OVER GENERATIONS IS GENERATED:
 
-        if recording == 'everything':
+    if recording == 'everything':
 
-            min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 = measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspective_probs, multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix)
-
-
-            print "min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 is:"
-            print min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00
+        min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 = measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspective_probs, multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix)
 
 
-            plotting_time = time.clock()-t3
-            print 
-            print 'plotting_time is:'
-            print str((plotting_time/60))+" m"
+        print "min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 is:"
+        print min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00
+
+
+        plotting_time = time.clock()-t3
+        print
+        print 'plotting_time is:'
+        print str((plotting_time/60))+" m"

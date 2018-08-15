@@ -1872,7 +1872,7 @@ class DistinctionPopulation(Population):
             # FIXME: Again: the new agent is initialized with attributes that are globally defined in the params_and_run module ()
             perspective_prior = prior.create_perspective_prior(self.perspective_hyps, self.lexicon_hyps, self.perspective_prior_type, self.learner_perspective, self.perspective_prior_strength)
             lexicon_prior = prior.create_lexicon_prior(self.lexicon_hyps, self.lexicon_prior_type, self.lexicon_prior_strength, self.error)
-            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(self.hypothesis_space, perspective_prior, lexicon_prior, self.size)
+            composite_log_priors = prior.list_composite_log_priors_with_speaker_distinction(self.hypothesis_space, self.perspective_hyps, self.lexicon_hyps, perspective_prior, lexicon_prior, self.size)
             new_agent = DistinctionAgent(self.perspective_hyps, self.lexicon_hyps, composite_log_priors, composite_log_priors, new_agent_perspective[0], self.alpha, new_agent_lexicon, new_agent_learning_type[0], self.size)
 
             # 1.4) Then we get the new agent's parent data from the old population:

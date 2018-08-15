@@ -1,11 +1,11 @@
 __author__ = 'Marieke Woensdregt'
 
-import time
 import numpy as np
-from run_sim_learner_speaker_for_cluster import multi_runs_dyadic
+import time
 import hypspace
-import saveresults
 import measur
+from run_sim_learner_speaker_for_cluster import multi_runs_dyadic
+import saveresults
 import sys
 
 

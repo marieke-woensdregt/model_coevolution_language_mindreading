@@ -2,6 +2,8 @@
 
 ## General
 In this folder you can find all the Python code I used to implement my Bayesian model of the co-evolution of language and mindreading (including development, iterated learning and biological evolution). I've organised the python scripts into three different folders. 
+**NOTE** that I've separated the files into different folders here to make this folder easier to navigate, but when running the simulations you'll have to put all scripts and modules in the same folder. Otherwise make sure you change the path of the import statements at the top of each python file.
+
 
 * In the [modules](https://github.com/marieke-woensdregt/model_coevolution_language_mindreading/tree/master/python_code/modules) folder you'll find all the core components needed to run the different types of simulations. I've separated these out into several modules which implement different parts of the model (e.g. agents, languages, contexts and so on). 
 

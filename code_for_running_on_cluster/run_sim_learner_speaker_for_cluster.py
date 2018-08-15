@@ -7,7 +7,7 @@ import lex
 import context
 import prior
 from pop import Agent, PragmaticAgent
-import measur_for_eddie
+import measur
 
 
 def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
@@ -108,7 +108,7 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
 
         data = speaker.produce_data(n_meanings, n_signals, context_matrix, n_utterances, error, extra_error)
         log_posteriors_per_data_point_matrix = learner.inference(n_contexts, n_utterances, data, error)
-        correct_p_hyp_indices = measur_for_eddie.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'perspective')
+        correct_p_hyp_indices = measur.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'perspective')
 
 
         # print
@@ -120,8 +120,8 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
         # FIXME: If I want the half_ambiguous lexicon to be generated with the ambiguous mappings chosen at random, I have to make sure that the majority_lex_hyp_indices and majority_composite_hyp_index are logged for each run separately
 
         if r == 0:
-            correct_lex_hyp_indices = measur_for_eddie.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'lexicon')
-            correct_composite_hyp_indices = measur_for_eddie.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'composite')
+            correct_lex_hyp_indices = measur.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'lexicon')
+            correct_composite_hyp_indices = measur.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'composite')
         multi_run_context_matrix[r] = data.contexts
         multi_run_utterances_matrix[r] = data.utterances
         multi_run_log_posterior_matrix[r] = log_posteriors_per_data_point_matrix

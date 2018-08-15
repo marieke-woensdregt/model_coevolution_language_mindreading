@@ -14,14 +14,26 @@ import saveresults
 
 
 
-np.set_printoptions(threshold=np.nan)
+# np.set_printoptions(threshold=np.nan)
+
 
 
 #######################################################################################################################
-# STEP 2: THE PARAMETERS:
+# 1: THE PARAMETERS:
 
 
-# 2.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
+##!!!!!! MAKE SURE TO CHANGE THE PATHS BELOW TO MATCH THE FILE SYSTEM OF YOUR MACHINE:
+pickle_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'
+
+plot_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Plots/'
+
+run_type_dir = 'Iteration/'
+
+
+
+
+
+# 1.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
 
 n_meanings = 3  # The number of meanings
 n_signals = 3  # The number of signals
@@ -29,10 +41,9 @@ n_signals = 3  # The number of signals
 
 
 
-# 2.2: The parameters defining the contexts and how they map to the agent's saliencies:
+# 1.2: The parameters defining the contexts and how they map to the agent's saliencies:
 
 context_generation = 'optimal' # This can be set to either 'random', 'only_helpful', 'optimal'
-#helpful_contexts = np.array([[0.1, 0.7], [0.3, 0.9], [0.1, 0.6], [0.4, 0.9], [0.1, 0.8], [0.2, 0.9], [0.1, 0.5], [0.5, 0.9], [0.1, 0.4], [0.6, 0.9], [0.7, 0.1], [0.9, 0.3], [0.6, 0.1], [0.9, 0.4], [0.8, 0.1], [0.9, 0.2], [0.5, 0.1], [0.9, 0.5], [0.4, 0.1], [0.9, 0.6]])  # This is a fixed collection of the 20 most helpful contexts (in which the ratio of meaning probability for the one perspective is maximally different from that for the other perspective).
 if n_meanings == 2:
     helpful_contexts = np.array([[0.1, 0.7], [0.3, 0.9],
                                  [0.7, 0.1], [0.9, 0.3]])
@@ -84,7 +95,7 @@ extra_error = True # Determines whether the error specified above gets added on 
 
 
 
-# 2.3: The parameters that determine the make-up of the population:
+# 1.3: The parameters that determine the make-up of the population:
 
 pop_size = 10
 
@@ -101,7 +112,7 @@ optimality_alpha_string = saveresults.convert_float_value_to_string(optimality_a
 teacher_type = 'sng_teacher'  # This can be set to either 'sng_teacher' or 'multi_teacher'
 
 
-# 2.4: The parameters that determine the learner's hypothesis space:
+# 1.4: The parameters that determine the learner's hypothesis space:
 
 perspective_hyps = np.array([0., 1.]) # The perspective hypotheses that the learner will consider (1D numpy array)
 
@@ -123,14 +134,9 @@ elif agent_type == 'p_distinction':
 
 
 
-# 2.5: More parameters that determine the make-up of the population:
+# 1.5: More parameters that determine the make-up of the population:
 
 lexicon_probs = np.array([0. for x in range(len(lexicon_hyps)-1)]+[1.])
-# print "lexicon_probs are:"
-# print lexicon_probs
-print "lexicon_probs.shape are:"
-print lexicon_probs.shape
-
 
 
 perspectives = np.array([0., 1.]) # The different perspectives that agents can have
@@ -145,11 +151,9 @@ if learning_type_probs[0] == 1.:
     learning_type_string = learning_types[0]
 elif learning_type_probs[1] == 1.:
     learning_type_string = learning_types[1]
-#learning_type_string = learning_types[np.where(learning_type_probs==1.)[0]]
 
 
-
-# 2.6: The parameters that determine the learner's prior:
+# 1.6: The parameters that determine the learner's prior:
 
 learner_type = 'both_unknown'  # This can be set to either 'perspective_unknown', 'lexicon_unknown' or 'both_unknown'
 
@@ -169,7 +173,7 @@ lexicon_prior_constant_string = saveresults.convert_array_to_string(lexicon_prio
 
 
 
-# 2.7: The parameters that determine the amount of data_dict that the learner gets to see, and the amount of runs of the simulation:
+# 1.7: The parameters that determine the amount of data_dict that the learner gets to see, and the amount of runs of the simulation:
 
 n_utterances = 1  # This parameter determines how many signals the learner gets to observe in each context
 n_contexts = 12  # The number of contexts that the learner gets to see.
@@ -178,7 +182,7 @@ first_input_stage_ratio = 0.5  # This is the ratio of contexts that will make up
 
 
 
-# 2.8: The parameters that determine the type and number of simulations that are run:
+# 1.8: The parameters that determine the type and number of simulations that are run:
 
 #FIXME: In the current implementation 'half_ambiguous_lex' can have different instantiations. Therefore, if we run a simulation where there are different lexicon_type_probs, we will want the run_type to be 'population_same_pop' to make sure that all the 'half ambiguous' speakers do have the SAME half ambiguous lexicon.
 run_type = 'iter'  # This parameter determines whether the learner communicates with only one speaker ('dyadic') or with a population ('population_diff_pop' if there are no speakers with the 'half_ambiguous' lexicon type, 'population_same_pop' if there are, 'population_same_pop_dist_learner' if the learner can distinguish between different speakers), or whether we do an iterated learning model ('iter')
@@ -213,72 +217,8 @@ lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or '
 decoupling = True  # This can be set to either True or False. It determines whether genetic and cultural inheritance are coupled (i.e. from the same cultural parent) or decoupled.
 
 
-
-pickle_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'
-
-run_type_dir = 'Iteration'
-
 #######################################################################################################################
 
-
-
-
-# print "n_contexts are:"
-# print n_contexts
-#
-# print "n_signals are:"
-# print n_signals
-#
-# print "len(helpful_contexts) is:"
-# print len(helpful_contexts)
-#
-#
-# all_datasets_as_signal_counts_per_context = data.create_all_possible_signal_counts_per_context_datasets(n_signals, n_contexts, len(helpful_contexts))
-# print ''
-# print ''
-# print "all_datasets_as_signal_counts_per_context[1] is:"
-# print all_datasets_as_signal_counts_per_context[1]
-# print ''
-# print "all_datasets_as_signal_counts_per_context.shape is:"
-# print all_datasets_as_signal_counts_per_context.shape
-#
-# all_datasets_as_signal_counts_per_context_reshaped = all_datasets_as_signal_counts_per_context.reshape((all_datasets_as_signal_counts_per_context.shape[0], (all_datasets_as_signal_counts_per_context.shape[1]*all_datasets_as_signal_counts_per_context.shape[2])))
-# print ''
-# print ''
-# print "all_datasets_as_signal_counts_per_context_reshaped[1] is:"
-# print all_datasets_as_signal_counts_per_context_reshaped[1]
-# print "all_datasets_as_signal_counts_per_context_reshaped.shape is:"
-# print all_datasets_as_signal_counts_per_context_reshaped.shape
-#
-#
-# dataset_array_pickle_file_specs = 'Dataset_array_'+str(n_meanings)+'M_'+str(n_signals)+'S_'+context_generation+'_'+str(len(helpful_contexts))+'_contexts_'+str(n_contexts)+'_observations'
-#
-# dataset_array_pickle_file_name = pickle_file_directory + dataset_array_pickle_file_specs + '.p'
-#
-#
-# pickle.dump(all_datasets_as_signal_counts_per_context_reshaped, open(pickle_file_directory+dataset_array_pickle_file_specs+'.p', 'wb'))
-#
-#
-#
-# likelihood_array = np.asarray([[np.nan for x in range(len(hypothesis_space))] for y in range(len(all_datasets_as_signal_counts_per_context_reshaped))])
-# print ''
-# print ''
-# print "likelihood_array[0] is:"
-# print likelihood_array[0]
-# print "likelihood_array.shape is:"
-# print likelihood_array.shape
-#
-#
-# likelihood_pickle_file_specs = 'Likelihood_array_'+str(n_meanings)+'M_'+str(n_signals)+'S_'+context_generation+'_'+str(len(helpful_contexts))+'_contexts_'+str(len(perspective_hyps))+'_p_hyps_'+str(len(lexicon_hyps))+'_l_hyps_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_error_'+error_string+'_'+agent_type
-#
-# pickle.dump(likelihood_array, open(pickle_file_directory+likelihood_pickle_file_specs+'.p', 'wb'))
-#
-#
-
-
-
-
-######################################################################
 
 def get_selected_hyps_ordered(n_runs, n_iterations, pop_size, multi_run_selected_hyps_per_generation_matrix, hyp_order):
             selected_hyps_new_lex_order_all_runs = np.zeros_like(multi_run_selected_hyps_per_generation_matrix)
@@ -435,12 +375,12 @@ def multi_runs_iteration(n_meanings, n_signals, n_runs, n_iterations, report_eve
     #
     # dataset_array_pickle_file_specs = 'Dataset_array_'+str(n_meanings)+'M_'+str(n_signals)+'S_'+context_generation+'_'+str(len(helpful_contexts))+'_contexts_'+str(n_contexts)+'_observations'
     #
-    # dataset_array_pickle_file_name = pickle_file_directory + dataset_array_pickle_file_specs + '.p'
+    # dataset_array_pickle_file_name = output_pickle_file_directory + dataset_array_pickle_file_specs + '.p'
     #
     #
     # likelihood_pickle_file_specs = 'Likelihood_array_'+str(n_meanings)+'M_'+str(n_signals)+'S_'+context_generation+'_'+str(len(helpful_contexts))+'_contexts_'+str(len(perspective_hyps))+'_p_hyps_'+str(len(lexicon_hyps))+'_l_hyps_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_error_'+error_string+'_'+agent_type
     #
-    # log_likelihood_pickle_file_name = pickle_file_directory + likelihood_pickle_file_specs + '.p'
+    # log_likelihood_pickle_file_name = output_pickle_file_directory + likelihood_pickle_file_specs + '.p'
 
 
     print ''
@@ -776,12 +716,12 @@ if __name__ == "__main__":
 
 
 
-    pickle_file_title_all_results = pickle_file_directory+run_type_dir+'/Results_'+filename
+    pickle_file_title_all_results = pickle_file_directory + run_type_dir + 'Results_' + filename
 
     saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
 
 
-    pickle_file_title_max_offspring_single_parent = pickle_file_directory+run_type_dir+'/Max_Offspring_'+filename
+    pickle_file_title_max_offspring_single_parent = pickle_file_directory + run_type_dir + 'Max_Offspring_' + filename
 
     saveresults.write_results_to_pickle_file(pickle_file_title_max_offspring_single_parent, multi_run_proportion_max_offspring_single_parent)
 
@@ -822,7 +762,7 @@ if __name__ == "__main__":
     # BELOW THE PLOT SHOWING THE PROPORTIONS WITH WHICH DIFFERENT HYPOTHESES ARE SELECTED OVER GENERATIONS IS GENERATED:
 
 
-    plot_file_path = pickle_file_directory+run_type_dir
+    plot_file_path = plot_file_directory + run_type_dir
 
     if context_generation == 'random':
         if selection_type == 'none' or selection_type == 'l_learning':

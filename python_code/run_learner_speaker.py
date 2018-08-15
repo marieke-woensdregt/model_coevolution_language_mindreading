@@ -17,7 +17,17 @@ import saveresults
 
 
 #######################################################################################################################
-# STEP 1: THE PARAMETERS:
+# 1: THE PARAMETERS:
+
+
+##!!!!!! MAKE SURE TO CHANGE THE PATHS BELOW TO MATCH THE FILE SYSTEM OF YOUR MACHINE:
+pickle_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'
+
+plot_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Plots/'
+
+run_type_dir = 'Learner_Speaker/'
+
+
 
 
 # 1.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
@@ -170,13 +180,9 @@ x_axis_steps = 12  # This determines where the xticks are placed on the plot.
 
 lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or 'ca' for communicative accuracy (of the lexicon with itself)
 
-#######################################################################################################################
-
-
-
-
 
 #######################################################################################################################
+
 
 
 def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
@@ -713,76 +719,73 @@ if __name__ == "__main__":
     # Below the results are saved as pickle files:
 
 
-    if n_runs > 0 and run_type == 'dyadic':
-        t2 = time.clock()
-
-        run_type_dir = 'Learner_Speaker'
+    t2 = time.clock()
 
 
 
-        if context_generation == 'random':
-            file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_inf_'+str(inf_level)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
+    if context_generation == 'random':
+        file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_inf_'+str(inf_level)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
 
-        elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_C'+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_inf_'+str(inf_level)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
+    elif context_generation == 'only_helpful' or context_generation == 'optimal':
+        file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_C'+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_inf_'+str(inf_level)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
 
 
 
 
-        pickle_file_title_all_results = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Results_'+file_title
+    pickle_file_title_all_results = pickle_file_directory + run_type_dir + 'Results_' + file_title
 
-        saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
-
-
-        #
-        # pickle_file_title_mean_std_final_posteriors = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Mean_Std_Final_Post_'+file_title
-        #
-        # saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
-        #
-        #
-
-        # pickle_file_title_lex_posterior_matrix = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/' + run_type_dir + '/Lex_Post_Matrix' + file_title
-        #
-        # saveresults.write_results_to_pickle_file(pickle_file_title_lex_posterior_matrix, lex_posterior_matrix)
-        #
+    saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
 
 
-        pickle_file_title_correct_hyp_posterior_mass_percentiles = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/' + run_type_dir + '/Correct_Hyp_Post_Mass_Percentiles_' + file_title
+    #
+    # pickle_file_title_mean_std_final_posteriors = output_pickle_file_directory+run_type_dir+'Mean_Std_Final_Post_'+file_title
+    #
+    # saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
+    #
+    #
 
-        saveresults.write_results_to_pickle_file(pickle_file_title_correct_hyp_posterior_mass_percentiles, percentiles_correct_hyp_posterior_mass_dict)
+    # pickle_file_title_lex_posterior_matrix = output_pickle_file_directory+ run_type_dir + 'Lex_Post_Matrix' + file_title
+    #
+    # saveresults.write_results_to_pickle_file(pickle_file_title_lex_posterior_matrix, lex_posterior_matrix)
+    #
 
 
+    pickle_file_title_correct_hyp_posterior_mass_percentiles = pickle_file_directory + run_type_dir + 'Correct_Hyp_Post_Mass_Percentiles_' + file_title
 
-        pickle_file_title_correct_hyp_posterior_mass_mean = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/' + run_type_dir + '/Correct_Hyp_Post_Mass_Mean_' + file_title
-
-        saveresults.write_results_to_pickle_file(pickle_file_title_correct_hyp_posterior_mass_mean, mean_correct_hyp_posterior_mass_dict)
+    saveresults.write_results_to_pickle_file(pickle_file_title_correct_hyp_posterior_mass_percentiles, percentiles_correct_hyp_posterior_mass_dict)
 
 
 
-        # pickle_file_title_hypothesis_percentiles = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/' + run_type_dir + '/Hyp_Percentiles' + file_title
-        #
-        # saveresults.write_results_to_pickle_file(pickle_file_title_hypothesis_percentiles, hypotheses_percentiles)
-        #
+    pickle_file_title_correct_hyp_posterior_mass_mean = pickle_file_directory + run_type_dir + 'Correct_Hyp_Post_Mass_Mean_' + file_title
 
-        #
-        # pickle_file_title_convergence_time_min_max = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Convergence_Time_Percentiles'+file_title
-        #
-        # saveresults.write_results_to_pickle_file(pickle_file_title_convergence_time_min_max, convergence_time_dict)
-        #
-        #
-        #
-        # pickle_file_title_convergence_time_percentiles = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/Convergence_Time_Percentiles'+file_title
-        #
-        # saveresults.write_results_to_pickle_file(pickle_file_title_convergence_time_percentiles, percentiles_converge_time_over_theta_dict)
-        #
+    saveresults.write_results_to_pickle_file(pickle_file_title_correct_hyp_posterior_mass_mean, mean_correct_hyp_posterior_mass_dict)
+
+
+
+    # pickle_file_title_hypothesis_percentiles = output_pickle_file_directory+ run_type_dir + 'Hyp_Percentiles' + file_title
+    #
+    # saveresults.write_results_to_pickle_file(pickle_file_title_hypothesis_percentiles, hypotheses_percentiles)
+    #
+
+    #
+    # pickle_file_title_convergence_time_min_max = output_pickle_file_directory+run_type_dir+'Convergence_Time_Percentiles'+file_title
+    #
+    # saveresults.write_results_to_pickle_file(pickle_file_title_convergence_time_min_max, convergence_time_dict)
+    #
+    #
+    #
+    # pickle_file_title_convergence_time_percentiles = output_pickle_file_directory+run_type_dir+'Convergence_Time_Percentiles'+file_title
+    #
+    # saveresults.write_results_to_pickle_file(pickle_file_title_convergence_time_percentiles, percentiles_converge_time_over_theta_dict)
+    #
 
 
 
 
 
-        write_to_files_time = time.clock()-t2
-        print
-        print 'write_to_files_time is:'
-        print str((write_to_files_time/60))+" m"
+    write_to_files_time = time.clock()-t2
+    print
+    print 'write_to_files_time is:'
+    print str((write_to_files_time/60))+" m"
 
 

@@ -1,30 +1,38 @@
 __author__ = 'Marieke Woensdregt'
 
 
-import pop
-import lex
-import hypspace
-import time
 import numpy as np
 from scipy import stats
+import time
+
+import hypspace
+import lex
 import pickle
+import pop
 from saveresults import convert_array_to_string
 
 
-np.set_printoptions(threshold=np.nan)
-
+# np.set_printoptions(threshold=np.nan)
 
 
 #######################################################################################################################
-# STEP 2: SOME PARAMETER RESETTING:
+# 1: THE PARAMETERS:
 
 
-# 2.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
+##!!!!!! MAKE SURE TO CHANGE THE PATHS BELOW TO MATCH THE FILE SYSTEM OF YOUR MACHINE:
+# iteration_results_directory = '/exports/eddie/scratch/s1370641/'
+
+iteration_results_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Eddie_Output/'
+
+output_pickle_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/Evolvability_Analysis/'
+
+
+# 1.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
 
 n_meanings = 3  # The number of meanings
 n_signals = 3  # The number of signals
 
-# 2.2: The parameters defining the contexts and how they map to the agent's saliencies:
+# 1.2: The parameters defining the contexts and how they map to the agent's saliencies:
 
 context_generation = 'optimal'  # This can be set to either 'random', 'only_helpful' or 'optimal'
 if n_meanings == 2:
@@ -72,10 +80,10 @@ error_string = convert_array_to_string(error)
 extra_error = True # Determines whether the error specified above gets added on top AFTER the pragmatic speaker has calculated its production probabilities by maximising the utility to the listener.
 
 
-# 2.3: The parameters that determine the make-up of the population:
+# 1.3: The parameters that determine the make-up of the population:
 
 pop_size_initial_pop = 100
-pop_size_mixed_pop = 5
+pop_size_mixed_pop = 10
 n_mutants = 1  # the number of mutants initially inserted into the first generation of the mixed population
 
 
@@ -87,20 +95,9 @@ lexicon_type_probs = np.array([0., 0., 1.]) # The ratios with which the differen
 lexicon_type_probs_string = convert_array_to_string(lexicon_type_probs) # Turns the lexicon type probs into a string in order to add it to file names
 
 
-print ''
-print ''
-print "lexicon_type_probs_string is:"
-print lexicon_type_probs_string
-
-
 perspectives = np.array([0., 1.]) # The different perspectives that agents can have
 perspective_probs = np.array([0., 1.]) # The ratios with which the different perspectives will be present in the population
 perspective_probs_string = convert_array_to_string(perspective_probs) # Turns the perspective probs into a string in order to add it to file names
-
-print ''
-print ''
-print "perspective_probs_string is:"
-print perspective_probs_string
 
 
 learning_types = ['map', 'sample'] # The types of learning that the learners can do
@@ -127,7 +124,7 @@ teacher_type = 'sng_teacher'  # This can be set to either 'sng_teacher' or 'mult
 
 
 
-# 2.6: The parameters that determine the learner's hypothesis space:
+# 1.4: The parameters that determine the learner's hypothesis space:
 
 perspective_hyps = np.array([0., 1.]) # The perspective hypotheses that the learner will consider (1D numpy array)
 
@@ -144,7 +141,7 @@ elif which_lexicon_hyps == 'only_optimal':
 hypothesis_space = hypspace.list_hypothesis_space(perspective_hyps, lexicon_hyps) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
 
 
-# 2.7: The parameters that determine the learner's prior:
+# 1.5: The parameters that determine the learner's prior:
 
 learner_perspective = 0.  # The learner's perspective
 
@@ -183,7 +180,7 @@ else:
 n_iterations_initial_pop = 500  # The number of iterations (i.e. new agents in the case of 'chain', generations in the case of 'whole_pop')
 n_iterations_mixed_pop = 10  # The number of iterations (i.e. new agents in the case of 'chain', generations in the case of 'whole_pop')
 report_every_i = 1
-cut_off_point = 100
+cut_off_point = 5
 n_runs_initial_pop = 1  # The number of runs of the simulation
 report_every_r = 1
 
@@ -196,11 +193,6 @@ lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or '
 
 run_type = 'iter'
 
-# iteration_results_directory = '/exports/eddie/scratch/s1370641/'
-
-iteration_results_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Eddie_Output/'
-
-results_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/Evolvability_Analysis/'
 
 decoupling = True  # This can be set to either True or False. It determines whether genetic and cultural inheritance are coupled (i.e. from the same cultural parent) or decoupled.
 
@@ -220,10 +212,6 @@ def get_final_pop_lex_indices(directory, copy_specification, n_runs, n_iteration
     elif selection_type == 'ca_with_parent':
         folder_name = 'results_'+run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S_select_'+selection_type+'_'+communication_type_initial_pop+'_'+ca_measure_type_initial_pop+'_p_prior_'+perspective_prior_type[:4]+'_'+perspective_prior_strength_string+'_l_prior_'+lexicon_prior_type[:4]+'_'+pragmatic_level_initial_pop+'_a_'+str(int(optimality_alpha_initial_pop))+'/'
 
-    print 'folder_name is:'
-    print folder_name
-
-
 
 
     if selection_type == 'none' or selection_type == 'p_taking':
@@ -237,10 +225,6 @@ def get_final_pop_lex_indices(directory, copy_specification, n_runs, n_iteration
 
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
             filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts_original)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type+copy_specification
-    print ''
-    print "filename is:"
-    print filename
-
 
 
     pickle_filename_all_results = 'Results_'+filename
@@ -432,11 +416,6 @@ def evolvability_iteration(run_number, n_meanings, n_signals, n_iterations_mixed
 
 
     population = pop.MixedPopulation(pop_size_mixed_pop, n_meanings, n_signals, hypothesis_space, perspective_hyps, lexicon_hyps, learner_perspective, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, perspectives, perspective_probs, sal_alpha, final_pop_lex_indices, final_pop_lexicons, error, extra_error, pragmatic_level_initial_pop, optimality_alpha_initial_pop, pragmatic_level_mutants, optimality_alpha_mutants, pragmatic_level_parent_hyp, n_contexts, context_type, context_generation, context_size, helpful_contexts, n_utterances, learning_types, learning_type_probs)
-
-
-    # #TODO: !!!!!
-    # n_contexts = 0
-    # # TODO: !!!!!
 
 
     for i in range(n_iterations_mixed_pop):
@@ -683,13 +662,13 @@ if __name__ == "__main__":
 
 
 
-    pickle_file_title_all_results = results_directory+'Results_'+filename
+    pickle_file_title_all_results = output_pickle_file_directory + 'Results_' + filename
 
     pickle.dump(all_results_dict, open(pickle_file_title_all_results+'.p', 'wb'))
 
 
 
-    pickle_file_title_max_offspring_single_parent = results_directory+'Max_Offspr_'+filename
+    pickle_file_title_max_offspring_single_parent = output_pickle_file_directory + 'Max_Offspr_' + filename
 
     pickle.dump(proportion_max_offspring_single_parent, open(pickle_file_title_max_offspring_single_parent+'.p', 'wb'))
 

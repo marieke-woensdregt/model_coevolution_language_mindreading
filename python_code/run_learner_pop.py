@@ -19,7 +19,16 @@ import saveresults
 
 
 #######################################################################################################################
-# STEP 1: THE PARAMETERS:
+# 1: THE PARAMETERS:
+
+
+##!!!!!! MAKE SURE TO CHANGE THE PATHS BELOW TO MATCH THE FILE SYSTEM OF YOUR MACHINE:
+pickle_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'
+
+plot_file_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Plots/'
+
+run_type_dir = 'Learner_Pop/'
+
 
 
 # 1.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
@@ -913,75 +922,73 @@ if __name__ == "__main__":
     # Below the actual writing of the results to text and pickle files happens:
 
 
-    if n_runs > 0:
-        t2 = time.clock()
-
-        run_type_dir = 'Learner_Pop'
-
-        if run_type == 'population_diff_pop':
-            if context_generation == 'random':
-                file_title = 'diff_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
-
-            elif context_generation == 'only_helpful' or context_generation == 'optimal':
-                file_title = 'diff_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
-
-        elif run_type == 'population_same_pop':
-            if context_generation == 'random':
-                file_title = 'same_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
-
-            elif context_generation == 'only_helpful' or context_generation == 'optimal':
-                file_title = 'same_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+    t2 = time.clock()
 
 
-        elif run_type == 'population_same_pop_dist_learner':
-            if context_generation == 'random':
-                file_title = 'same_pop_dist_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+    if run_type == 'population_diff_pop':
+        if context_generation == 'random':
+            file_title = 'diff_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
 
-            elif context_generation == 'only_helpful' or context_generation == 'optimal':
-                file_title = 'same_pop_dist_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+        elif context_generation == 'only_helpful' or context_generation == 'optimal':
+            file_title = 'diff_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+
+    elif run_type == 'population_same_pop':
+        if context_generation == 'random':
+            file_title = 'same_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+
+        elif context_generation == 'only_helpful' or context_generation == 'optimal':
+            file_title = 'same_pop_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+
+
+    elif run_type == 'population_same_pop_dist_learner':
+        if context_generation == 'random':
+            file_title = 'same_pop_dist_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
+
+        elif context_generation == 'only_helpful' or context_generation == 'optimal':
+            file_title = 'same_pop_dist_size_'+str(pop_size)+'_'+str(speaker_order_type)+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(context_type)+'_contexts_'+'p_probs_'+perspective_probs_string+'_'+learner_type+'_lex_hyps_'+which_lexicon_hyps+'_lex_prior_'+lexicon_prior_type+'_learning_type_probs_'+learning_type_probs_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U'
 
 
 
-        results_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Results_'+file_title
+    results_pickle_file_title = pickle_file_directory+run_type_dir+'Results_'+file_title
 
-        saveresults.write_results_to_pickle_file(results_pickle_file_title, results_dict)
-
-
-        if run_type == 'population_same_pop_dist_learner':
-
-            percentiles_belief_perspective_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Belief_Persp_'+file_title
-
-            saveresults.write_results_to_pickle_file(percentiles_belief_perspective_pickle_file_title, percentiles_p_hyp_posterior_mass_correct_per_speaker)
-
-            percentiles_belief_lexicon_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Belief_Lex_'+file_title
-
-            saveresults.write_results_to_pickle_file(percentiles_belief_lexicon_pickle_file_title, percentiles_lex_hyp_posterior_mass_correct)
-
-            percentiles_belief_composite_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Belief_Comp_'+file_title
-
-            saveresults.write_results_to_pickle_file(percentiles_belief_composite_pickle_file_title, percentiles_composite_hyp_posterior_mass_correct)
+    saveresults.write_results_to_pickle_file(results_pickle_file_title, results_dict)
 
 
+    if run_type == 'population_same_pop_dist_learner':
 
-            percentiles_cumulative_belief_perspective_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Cum_Belief_Persp_'+file_title
+        percentiles_belief_perspective_pickle_file_title = pickle_file_directory+run_type_dir+'Belief_Persp_'+file_title
 
-            saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_perspective_pickle_file_title, percentiles_cumulative_belief_perspective_per_speaker)
+        saveresults.write_results_to_pickle_file(percentiles_belief_perspective_pickle_file_title, percentiles_p_hyp_posterior_mass_correct_per_speaker)
 
-            percentiles_cumulative_belief_lexicon_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Cum_Belief_Lex_'+file_title
+        percentiles_belief_lexicon_pickle_file_title = pickle_file_directory+run_type_dir+'Belief_Lex_'+file_title
 
-            saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_lexicon_pickle_file_title, percentiles_cumulative_belief_lexicon)
+        saveresults.write_results_to_pickle_file(percentiles_belief_lexicon_pickle_file_title, percentiles_lex_hyp_posterior_mass_correct)
 
-            percentiles_cumulative_belief_composite_pickle_file_title = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/'+run_type_dir+'/'+'Cum_Belief_Comp_'+file_title
+        percentiles_belief_composite_pickle_file_title = pickle_file_directory+run_type_dir+'Belief_Comp_'+file_title
 
-            saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_composite_pickle_file_title, percentiles_cumulative_belief_composite)
+        saveresults.write_results_to_pickle_file(percentiles_belief_composite_pickle_file_title, percentiles_composite_hyp_posterior_mass_correct)
+
+
+
+        percentiles_cumulative_belief_perspective_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Persp_'+file_title
+
+        saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_perspective_pickle_file_title, percentiles_cumulative_belief_perspective_per_speaker)
+
+        percentiles_cumulative_belief_lexicon_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Lex_'+file_title
+
+        saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_lexicon_pickle_file_title, percentiles_cumulative_belief_lexicon)
+
+        percentiles_cumulative_belief_composite_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Comp_'+file_title
+
+        saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_composite_pickle_file_title, percentiles_cumulative_belief_composite)
 
 
 
 
-        write_to_files_time = time.clock()-t2
-        print 
-        print 'write_to_files_time is:'
-        print str((write_to_files_time/60))+" m"
+    write_to_files_time = time.clock()-t2
+    print
+    print 'write_to_files_time is:'
+    print str((write_to_files_time/60))+" m"
 
 
 
@@ -990,76 +997,75 @@ if __name__ == "__main__":
     # The code below makes the plots and saves them:
 
 
-    if n_runs > 0:
-        t3 = time.clock()
+    t3 = time.clock()
 
-        plot_file_path = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Plots/'+run_type_dir
-        plot_file_title = file_title
-
-
-
-        if run_type == 'population_same_pop' or run_type == 'population_diff_pop':
-            scores_plot_title = 'Posterior probability assigned to the correct (part) hypothesis over time'
-
-            plots.plot_timecourse_scores_percentiles(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
-
-
-            plots.plot_timecourse_scores_percentiles_without_error_median(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
-
-
-            plots.plot_timecourse_scores_percentiles_without_error_mean(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
-
-            hypotheses_plot_title = 'Posterior probability assigned to each composite hypothesis over time'
-
-            # plots.plot_timecourse_hypotheses_percentiles(hypotheses_plot_title, plot_file_title, ((n_contexts*n_utterances)+1), hypotheses_percentiles, correct_hypothesis_index, mirror_hypothesis_index)
+    plot_file_path = plot_file_directory+run_type_dir
+    plot_file_title = file_title
 
 
 
-            lex_heatmap_title = 'Heatmap of posterior probability distribution over m-s mappings'
+    if run_type == 'population_same_pop' or run_type == 'population_diff_pop':
+        scores_plot_title = 'Posterior probability assigned to the correct (part) hypothesis over time'
 
-            # plots.plot_lexicon_heatmap(lex_heatmap_title, plot_file_path, plot_file_title, lex_posterior_matrix)
-            #
-
-
-            convergence_time_plot_title = 'No. of observations required to reach 1.0-theta posterior on correct hypothesis'
-
-            # plots.plot_convergence_time_over_theta_range(convergence_time_plot_title, plot_file_path, plot_file_title, theta_range, percentiles_convergence_time_over_theta_composite, percentiles_convergence_time_over_theta_perspective, percentiles_convergence_time_over_theta_lexicon)
-            #
-            #
+        plots.plot_timecourse_scores_percentiles(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
 
 
-        elif run_type == 'population_same_pop_dist_learner':
-
-            scores_plot_title = 'Posterior probability assigned to the correct (part) hypothesis over time'
+        plots.plot_timecourse_scores_percentiles_without_error_median(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
 
 
-            plots.plot_timecourse_scores_percentiles_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+        plots.plot_timecourse_scores_percentiles_without_error_mean(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
 
+        hypotheses_plot_title = 'Posterior probability assigned to each composite hypothesis over time'
 
-            # plots.plot_timecourse_scores_percentiles_without_error_median_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
-            #
-            #
-            # plots.plot_timecourse_scores_percentiles_without_error_mean_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+        # plots.plot_timecourse_hypotheses_percentiles(hypotheses_plot_title, plot_file_title, ((n_contexts*n_utterances)+1), hypotheses_percentiles, correct_hypothesis_index, mirror_hypothesis_index)
 
 
 
+        lex_heatmap_title = 'Heatmap of posterior probability distribution over m-s mappings'
 
-            cumulative_belief_plot_title = 'Cumulative belief in the correct composite hypothesis over time'
-
-
-            # plots.plot_cum_belief_percentiles_with_speaker_distinction(cumulative_belief_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_cumulative_belief_composite, percentiles_cumulative_belief_perspective_per_speaker,  percentiles_cumulative_belief_lexicon)
-            #
-            #
-            # plots.plot_cum_belief_percentiles_without_error_median_with_speaker_distinction(cumulative_belief_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_cumulative_belief_composite, percentiles_cumulative_belief_perspective_per_speaker,  percentiles_cumulative_belief_lexicon)
-            #
-            #
-            # plots.plot_cum_belief_percentiles_without_error_mean_with_speaker_distinction(cumulative_belief_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_cumulative_belief_composite, percentiles_cumulative_belief_perspective_per_speaker,  percentiles_cumulative_belief_lexicon)
+        # plots.plot_lexicon_heatmap(lex_heatmap_title, plot_file_path, plot_file_title, lex_posterior_matrix)
+        #
 
 
+        convergence_time_plot_title = 'No. of observations required to reach 1.0-theta posterior on correct hypothesis'
 
-        plotting_time = time.clock()-t3
-        print 
-        print 'plotting_time is:'
-        print str((plotting_time/60))+" m"
+        # plots.plot_convergence_time_over_theta_range(convergence_time_plot_title, plot_file_path, plot_file_title, theta_range, percentiles_convergence_time_over_theta_composite, percentiles_convergence_time_over_theta_perspective, percentiles_convergence_time_over_theta_lexicon)
+        #
+        #
+
+
+    elif run_type == 'population_same_pop_dist_learner':
+
+        scores_plot_title = 'Posterior probability assigned to the correct (part) hypothesis over time'
+
+
+        plots.plot_timecourse_scores_percentiles_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+
+
+        # plots.plot_timecourse_scores_percentiles_without_error_median_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+        #
+        #
+        # plots.plot_timecourse_scores_percentiles_without_error_mean_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+
+
+
+
+        cumulative_belief_plot_title = 'Cumulative belief in the correct composite hypothesis over time'
+
+
+        # plots.plot_cum_belief_percentiles_with_speaker_distinction(cumulative_belief_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_cumulative_belief_composite, percentiles_cumulative_belief_perspective_per_speaker,  percentiles_cumulative_belief_lexicon)
+        #
+        #
+        # plots.plot_cum_belief_percentiles_without_error_median_with_speaker_distinction(cumulative_belief_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_cumulative_belief_composite, percentiles_cumulative_belief_perspective_per_speaker,  percentiles_cumulative_belief_lexicon)
+        #
+        #
+        # plots.plot_cum_belief_percentiles_without_error_mean_with_speaker_distinction(cumulative_belief_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_cumulative_belief_composite, percentiles_cumulative_belief_perspective_per_speaker,  percentiles_cumulative_belief_lexicon)
+
+
+
+    plotting_time = time.clock()-t3
+    print
+    print 'plotting_time is:'
+    print str((plotting_time/60))+" m"
 
 

@@ -14,3 +14,8 @@ Throughout these modules I used a mixture of object-oriented programming and reg
 
 ## Running large simulations
 **Note** that some of these simulations take quite a long time to run (learners require a relatively large amount of observations because they are subjected to a joint inference task of simultaneously inferring the perspective and the lexicon of the speaker), so it might be worth outsourcing the running of large simulations to a computer cluster or similar. See more info on that in the folder [code_for_running_on_cluster](https://github.com/marieke-woensdregt/model_coevolution_language_mindreading/tree/master/code_for_running_on_cluster).
+
+
+### References
+Woensdregt, M., Kirby, S., Cummins, C. & Smith, K. (2016). [Modelling the co-development of word learning and perspective-taking.](https://mindmodeling.org/cogsci2016/papers/0222/paper0222.pdf) Proceedings of 38th Annual Meeting of the Cognitive Science Society.
+

@@ -318,7 +318,7 @@ def find_majority_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, 
     majority_perspective_index = np.argmax(population_perspective_probs)
     #FIXME: calling perspectives as global variable from params_and_run module (but maybe that's ok)
     majority_perspective = perspective_hyps[majority_perspective_index]
-    majority_lexicon = find_majority_lexicon(population_lexicons, population_lexicon_type_probs)
+    majority_lexicon = find_majority_lexicon(population_lexicons, population_lexicons, population_lexicon_type_probs)
     majority_hyp_indices = find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, majority_perspective, majority_lexicon, which_hyps)
     return majority_hyp_indices
 

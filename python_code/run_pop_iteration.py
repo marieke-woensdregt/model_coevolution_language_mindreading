@@ -99,7 +99,7 @@ extra_error = True # Determines whether the error specified above gets added on 
 
 pop_size = 10
 
-agent_type = 'p_distinction' # This can be set to either 'p_distinction' or 'no_p_distinction'. Determines whether the population is made up of DistinctionAgent objects or Agent objects (DistinctionAgents can learn different perspectives for different agents, Agents can only learn one perspective for all agents they learn from).
+agent_type = 'no_p_distinction' # This can be set to either 'p_distinction' or 'no_p_distinction'. Determines whether the population is made up of DistinctionAgent objects or Agent objects (DistinctionAgents can learn different perspectives for different agents, Agents can only learn one perspective for all agents they learn from).
 
 
 
@@ -477,7 +477,7 @@ def multi_runs_iteration(n_meanings, n_signals, n_runs, n_iterations, report_eve
 
             # 1.2) Then the population is created:
 
-            lexicons_per_agent = np.random.choice(lexicon_hyps, pop_size, replace=True, p=lexicon_probs)
+            lexicons_per_agent = np.random.choice(np.arange(len(lexicon_hyps)), pop_size, replace=True, p=lexicon_probs)
 
             perspectives_per_agent = np.random.choice(perspectives, pop_size, replace=True, p=perspective_probs)
 

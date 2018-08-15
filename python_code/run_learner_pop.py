@@ -299,20 +299,16 @@ def multi_runs_population_diff_pop(n_meanings, n_signals, n_runs, n_contexts, n_
             data = population.produce_pop_data_fixed_contexts(context_matrix, n_utterances, speaker_order, helpful_contexts, n_signals)
         log_posteriors_per_data_point_matrix = learner.inference_on_signal_counts_data(data, error)
 
-        majority_p_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_probs, 'perspective')
-        majority_lex_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_probs, 'lexicon')
-        majority_composite_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_probs, 'composite')
 
         # FIXME: If I want the half_ambiguous lexicon to be generated with the ambiguous mappings chosen at random, I have to make sure that the majority_lex_hyp_indices and majority_composite_hyp_index are logged for each run separately
 
-        majority_lexicon = measur.find_majority_lexicon(population.lexicons, population.lexicon_type_probs)
         multi_run_context_matrix[r] = data.contexts
         multi_run_utterances_matrix[r] = data.utterances
         multi_run_log_posterior_matrix[r] = log_posteriors_per_data_point_matrix
 
     run_time_mins = (time.clock()-t0)/60.
 
-    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix, 'majority_p_hyp_indices':majority_p_hyp_indices, 'majority_lex_hyp_indices':majority_lex_hyp_indices, 'majority_composite_hyp_indices':majority_composite_hyp_indices, 'majority_lexicon':majority_lexicon, 'population_lexicons':population.lexicons, 'run_time_mins':run_time_mins}
+    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix, 'population_lexicons':population.lexicons, 'run_time_mins':run_time_mins}
     return results_dict
 
 

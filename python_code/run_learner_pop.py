@@ -170,7 +170,7 @@ theta_step_string = theta_step_string.replace(".", "")
 # 1.10: The parameters that determine the type and number of simulations that are run:
 
 #FIXME: In the current implementation 'half_ambiguous_lex' can have different instantiations. Therefore, if we run a simulation where there are different lexicon_type_probs, we will want the run_type to be 'population_same_pop' to make sure that all the 'half ambiguous' speakers do have the SAME half ambiguous lexicon.
-run_type = 'population_same_pop_dist_learner' # This can be set to 'population_diff_pop' if there are no speakers with the 'half_ambiguous' lexicon type, 'population_same_pop' if there are, 'population_same_pop_dist_learner' if the learner can distinguish between different speakers
+run_type = 'population_diff_pop' # This can be set to 'population_diff_pop' if there are no speakers with the 'half_ambiguous' lexicon type, 'population_same_pop' if there are, 'population_same_pop_dist_learner' if the learner can distinguish between different speakers
 
 if run_type == 'population_diff_pop' or run_type == 'population_same_pop':
     agent_type = 'no_p_distinction' # This can be set to either 'p_distinction' or 'no_p_distinction'. Determines whether the population is made up of DistinctionAgent objects or Agent objects (DistinctionAgents can learn different perspectives for different agents, Agents can only learn one perspective for all agents they learn from).
@@ -288,11 +288,11 @@ def multi_runs_population_diff_pop(n_meanings, n_signals, n_runs, n_contexts, n_
             data = population.produce_pop_data(context_matrix, n_utterances, speaker_order)
         elif context_generation == 'optimal':
             data = population.produce_pop_data_fixed_contexts(context_matrix, n_utterances, speaker_order, helpful_contexts, n_signals)
-        log_posteriors_per_data_point_matrix = learner.inference(n_contexts, n_utterances, data, error)
+        log_posteriors_per_data_point_matrix = learner.inference_on_signal_counts_data(data, error)
 
-        majority_p_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_type_probs, 'perspective')
-        majority_lex_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_type_probs, 'lexicon')
-        majority_composite_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_type_probs, 'composite')
+        majority_p_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_probs, 'perspective')
+        majority_lex_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_probs, 'lexicon')
+        majority_composite_hyp_indices = measur.find_majority_hyp_indices(hypothesis_space, population.perspectives, population.perspective_probs, population.lexicons, population.lexicon_probs, 'composite')
 
         # FIXME: If I want the half_ambiguous lexicon to be generated with the ambiguous mappings chosen at random, I have to make sure that the majority_lex_hyp_indices and majority_composite_hyp_index are logged for each run separately
 

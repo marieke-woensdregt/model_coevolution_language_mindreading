@@ -1,6 +1,6 @@
 __author__ = 'Marieke Woensdregt'
 
-import itertools
+
 import numpy as np
 import time
 

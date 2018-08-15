@@ -13,7 +13,7 @@ In this folder you can find all the Python code I used to implement my Bayesian 
 Throughout these modules I used a mixture of object-oriented programming and regular functions, and explained how each function, class or method works using docstrings and comments. I also used long and intelligible variable and function names, which should hopefully make the code relatively easy to read.
 
 ## Running large simulations
-**Note** that some of these simulations take quite a long time to run (learners require a relatively large amount of observations because they are subjected to a joint inference task of simultaneously inferring the perspective and the lexicon of the speaker), so it might be worth outsourcing the running of large simulations to a computer cluster or similar. See more info on that in the folder [code_for_running_on_cluster](https://github.com/marieke-woensdregt/model_coevolution_language_mindreading/tree/master/code_for_running_on_cluster).
+**NOTE** that some of these simulations take quite a long time to run (learners require a relatively large amount of observations because they are subjected to a joint inference task of simultaneously inferring the perspective and the lexicon of the speaker), so it might be worth outsourcing the running of large simulations to a computer cluster or similar. See more info on that in the folder [code_for_running_on_cluster](https://github.com/marieke-woensdregt/model_coevolution_language_mindreading/tree/master/code_for_running_on_cluster).
 
 
 ### References

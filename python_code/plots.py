@@ -1,14 +1,13 @@
 __author__ = 'pplsuser'
 
 
-import prior
 import itertools
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
-import params
-import matplotlib
+import seaborn as sns
+
 from hypspace import get_sorted_lex_hyp_order
+import prior
 
 
 #############################################################################

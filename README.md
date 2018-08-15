@@ -10,4 +10,4 @@ In the folder [code_for_running_on_cluster](https://github.com/marieke-woensdreg
 
 
 ### References
-Woensdregt, M., Kirby, S., Cummins, C. & Smith, K. (2016). Modelling the co-development of word learning and perspective-taking. Proceedings of 38th Annual Meeting of the Cognitive Science Society.
+Woensdregt, M., Kirby, S., Cummins, C. & Smith, K. (2016). [Modelling the co-development of word learning and perspective-taking.](https://mindmodeling.org/cogsci2016/papers/0222/paper0222.pdf) Proceedings of 38th Annual Meeting of the Cognitive Science Society.

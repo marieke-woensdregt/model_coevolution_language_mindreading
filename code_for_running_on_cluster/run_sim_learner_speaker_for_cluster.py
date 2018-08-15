@@ -1,13 +1,14 @@
 __author__ = 'Marieke Woensdregt'
 
 
+import numpy as np
 import time
-from params_learner_speaker import *
-import lex
 import context
-import prior
-from pop import Agent, PragmaticAgent
+import lex
 import measur
+from pop import Agent, PragmaticAgent
+import prior
+
 
 
 def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):

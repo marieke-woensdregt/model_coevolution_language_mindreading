@@ -11,10 +11,48 @@ import prior
 
 
 
-def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
+def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
     """
-    :param: All parameters that this function takes are variables specified in the params_learner_speaker module
-    :return: A dictionary containing by index 0) multi_run_context_matrix; 1) multi_run_utterances_matrix; 2) multi_run_log_posterior_matrix; 3) majority_p_hyp_indices; 4) majority_lex_hyp_indices; 5) majority_composite_hyp_index and 6) speaker.lexicon.lexicon
+    :param n_meanings: integer specifying number of meanings ('objects') in the lexicon
+    :param n_signals: integer specifying number of signals in the lexicon
+    :param n_runs: integer specifying number of independent simulation runs to be run
+    :param n_contexts: integer specifying the number of contexts to be observed by the learner
+    :param n_utterances: integer specifying the number of utterances the learner gets to observe *per context*
+    :param context_generation: can be set to either 'random', 'only_helpful' or 'optimal'
+    :param context_type: can be set to either 'absolute' for meanings being in/out or 'continuous' for all meanings being present (but in different positions)
+    :param context_size: this parameter is only used if the context_type is 'absolute' and determines the number of meanings present
+    :param helpful_contexts: this parameter is only used if the parameter context_generation is set to either 'only_helpful' or 'optimal'
+    :param speaker_lex_type: lexicon type of the speaker. This can be set to either 'optimal_lex', 'half_ambiguous_lex', 'fully_ambiguous_lex' or 'specified_lexicon'
+    :param speaker_lex_index: this parameter is only used if the parameter speaker_lex_type is set to 'specified_lexicon'
+    :param error: float specifying the probability that the speaker makes a production error (i.e. randomly chooses a signal that isn't associated with the intended referent)
+    :param extra_error: can be set to either True or False. Determines whether the error specified above gets added on top AFTER the pragmatic speaker has calculated its production probabilities by maximising the utility to the listener.
+    :param pragmatic_level_speaker: can be set to either 'literal', 'perspective-taking' or 'prag'
+    :param optimality_alpha_speaker: optimality parameter in the RSA model for pragmatic speakers. Only used if the pragmatic_level_speaker parameter is set to 'prag'
+    :param pragmatic_level_learner: can be set to either 'literal', 'perspective-taking' or 'prag'
+    :param optimality_alpha_learner: optimality parameter in the RSA model for pragmatic speakers. Only used if the pragmatic_level_learner parameter is set to 'prag'
+    :param speaker_perspective: float specifying the perspective of the speaker (any float between 0.0 and 1.0, but make sure this aligns with the 'perspective_hyps' parameter below!)
+    :param sal_alpha: float. Exponent that is used by the saliency function. sal_alpha=1 gives a directly proportional relationship between meaning distances and meaning saliencies, with sal_alpha>1 the saliency of meanings goes down exponentially as their distance from the agent increases (and with sal_alpha<1 the other way around)
+    :param speaker_learning_type: can be set to either 'sample' for sampling from the posterior or 'map' for selecting only the maximum a posteriori hypothesis #FIXME: The speaker has to be initiated with a learning type because I have not yet coded up a subclass of Agent that is only Speaker (for which things like hypothesis space, prior distributiona and learning type would not have to be specified).
+    :param learner_perspective:  float specifying the perspective of the learner (any float between 0.0 and 1.0)
+    :param learner_lex_type: lexicon type of the learner. #FIXME: The learner has to be initiated with a lexicon type because I have not yet coded up a subclass of Agent that is only a Learner (for which the lexicon should not have to be specified in advance).
+    :param learner_learning_type: can be set to either 'sample' for sampling from the posterior or 'map' for selecting only the maximum a posteriori hypothesis
+    :param pragmatic_level_sp_hyp_lr: assumption that the learner has about the speaker's pragmatic level. Can be set to either 'literal', 'perspective-taking' or 'prag'
+    :param hypothesis_space: full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
+    :param perspective_hyps: the perspective hypotheses that the learner will consider (1D numpy array)
+    :param lexicon_hyps: the lexicon hypotheses that the learner will consider (1D numpy array)
+    :param perspective_prior_type: can be set to either 'neutral', 'egocentric', 'same_as_lexicon' or 'zero_order_tom'
+    :param perspective_prior_strength: strength of the egocentric prior (only used if the perspective_prior_type parameter is set to 'egocentric')
+    :param lexicon_prior_type: can be set to either 'neutral', 'ambiguous_fixed', 'half_ambiguous_fixed', 'expressivity_bias' or 'compressibility_bias'
+    :param lexicon_prior_constant: determines the strength of the lexicon bias, with small c creating a STRONG prior and large c creating a WEAK prior. (And with c = 1000 creating an almost uniform prior.)
+    :return: A dictionary containing:
+    1) 'multi_run_context_matrix':multi_run_context_matrix,
+    2) 'multi_run_utterances_matrix':multi_run_utterances_matrix,
+    3) 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix,
+    4) 'correct_p_hyp_indices':correct_p_hyp_indices,
+    5) 'correct_lex_hyp_indices':correct_lex_hyp_indices,
+    6) 'correct_composite_hyp_indices':correct_composite_hyp_indices,
+    7) 'speaker_lexicon':speaker.lexicon.lexicon,
+    8) 'run_time_mins':run_time_mins
     """
 
     t0 = time.clock()
@@ -63,8 +101,6 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
 
 
     for r in range(n_runs):
-        if r % report_every_r == 0:
-            print 'r = '+str(r)
 
         if context_generation == 'random':
             context_matrix = context.gen_context_matrix(context_type, n_meanings, context_size, n_contexts)

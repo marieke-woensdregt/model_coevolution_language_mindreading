@@ -1,16 +1,18 @@
 __author__ = 'Marieke Woensdregt'
 
 
-from params_iteration import *
-import pop
-import lex
-import time
-import saveresults
-import numpy as np
-import prior
-import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy import stats
+import seaborn as sns
+import time
+
+import hypspace
+import lex
+import pop
+import prior
+import saveresults
+
 
 
 np.set_printoptions(threshold=np.nan)
@@ -89,18 +91,18 @@ perspective_hyps = np.array([0., 1.]) # The perspective hypotheses that the lear
 
 which_lexicon_hyps = 'all' # Determines the set of lexicon hypotheses that the learner will consider. This can be set to either 'all', 'all_with_full_s_space' or 'only_optimal'
 if which_lexicon_hyps == 'all':
-    lexicon_hyps = create_all_lexicons(n_meanings, n_signals) # The lexicon hypotheses that the learner will consider (1D numpy array)
+    lexicon_hyps = hypspace.create_all_lexicons(n_meanings, n_signals) # The lexicon hypotheses that the learner will consider (1D numpy array)
 elif which_lexicon_hyps == 'all_with_full_s_space':
-    all_lexicon_hyps = create_all_lexicons(n_meanings, n_signals)
-    lexicon_hyps = remove_subset_of_signals_lexicons(all_lexicon_hyps) # The lexicon hypotheses that the learner will consider (1D numpy array)
+    all_lexicon_hyps = hypspace.create_all_lexicons(n_meanings, n_signals)
+    lexicon_hyps = hypspace.remove_subset_of_signals_lexicons(all_lexicon_hyps) # The lexicon hypotheses that the learner will consider (1D numpy array)
 elif which_lexicon_hyps == 'only_optimal':
-    lexicon_hyps = create_all_optimal_lexicons(n_meanings, n_signals) # The lexicon hypotheses that the learner will consider (1D numpy array)
+    lexicon_hyps = hypspace.create_all_optimal_lexicons(n_meanings, n_signals) # The lexicon hypotheses that the learner will consider (1D numpy array)
 
 
 
 
 
-#
+# ## Below a smaller hand-coded set of lexicon hypotheses to allow for a quick test run of the code:
 # ###!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # lexicon_hyps = np.array([[[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
 #                          [[1., 1., 0.], [0., 1., 0.], [0., 0., 1.]],

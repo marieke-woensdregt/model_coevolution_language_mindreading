@@ -248,7 +248,6 @@ def multi_runs_population_diff_pop(n_meanings, n_signals, n_runs, n_contexts, n_
 
     # 1) First the matrices are created that will be saving the data_dict and the posteriors:
     multi_run_context_matrix = np.zeros((n_runs, n_contexts, n_meanings))
-    multi_run_utterances_matrix = np.zeros((n_runs, n_contexts, n_utterances))
     multi_run_log_posterior_matrix = np.zeros((n_runs, ((n_contexts*n_utterances)+1), len(hypothesis_space)))
 
     # 2) Then the prior probability distribution for all agents is created:
@@ -303,12 +302,11 @@ def multi_runs_population_diff_pop(n_meanings, n_signals, n_runs, n_contexts, n_
         # FIXME: If I want the half_ambiguous lexicon to be generated with the ambiguous mappings chosen at random, I have to make sure that the majority_lex_hyp_indices and majority_composite_hyp_index are logged for each run separately
 
         multi_run_context_matrix[r] = data.contexts
-        multi_run_utterances_matrix[r] = data.utterances
         multi_run_log_posterior_matrix[r] = log_posteriors_per_data_point_matrix
 
     run_time_mins = (time.clock()-t0)/60.
 
-    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix, 'population_lexicons':population.lexicons, 'run_time_mins':run_time_mins}
+    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix, 'population_lexicons':population.lexicons, 'run_time_mins':run_time_mins}
     return results_dict
 
 
@@ -613,87 +611,6 @@ if __name__ == "__main__":
             pass
 
 
-        elif run_type == 'population_same_pop' or run_type == 'population_diff_pop':
-
-            majority_p_hyp_indices = results_dict['majority_p_hyp_indices']
-
-            majority_lex_hyp_indices = results_dict['majority_lex_hyp_indices']
-
-            majority_composite_hyp_indices = results_dict['majority_composite_hyp_indices']
-
-            print 
-            print "majority_composite_hyp_indices are:"
-            print majority_composite_hyp_indices
-
-
-            min_convergence_time_perspective, mean_convergence_time_perspective, median_convergence_time_perspective, max_convergence_time_perspective = measur.calc_majority_hyp_convergence_time(multi_run_log_posterior_matrix, majority_p_hyp_indices, theta_fixed)
-            # print 
-            # print 
-            # print "min_convergence_time_perspective is:"
-            # print str(min_convergence_time_perspective)+' observations'
-            # print "mean_convergence_time_perspective is:"
-            # print str(mean_convergence_time_perspective)+' observations'
-            # print "median_convergence_time_perspective is:"
-            # print str(median_convergence_time_perspective)+' observations'
-            # print "max_convergence_time_perspective is:"
-            # print str(max_convergence_time_perspective)+' observations'
-
-            min_convergence_time_lexicon, mean_convergence_time_lexicon, median_convergence_time_lexicon, max_convergence_time_lexicon = measur.calc_majority_hyp_convergence_time(multi_run_log_posterior_matrix, majority_lex_hyp_indices, theta_fixed)
-            # print 
-            # print 
-            # print "min_convergence_time_lexicon is:"
-            # print str(min_convergence_time_lexicon)+' observations'
-            # print "mean_convergence_time_lexicon is:"
-            # print str(mean_convergence_time_lexicon)+' observations'
-            # print "median_convergence_time_lexicon is:"
-            # print str(median_convergence_time_lexicon)+' observations'
-            # print "max_convergence_time_lexicon is:"
-            # print str(max_convergence_time_lexicon)+' observations'
-
-            min_convergence_time_composite, mean_convergence_time_composite, median_convergence_time_composite, max_convergence_time_composite = measur.calc_majority_hyp_convergence_time(multi_run_log_posterior_matrix, majority_composite_hyp_indices, theta_fixed)
-            # print 
-            # print 
-            # print "min_convergence_time_composite is:"
-            # print str(min_convergence_time_composite)+' observations'
-            # print "mean_convergence_time_composite is:"
-            # print str(mean_convergence_time_composite)+' observations'
-            # print "median_convergence_time_composite is:"
-            # print str(median_convergence_time_composite)+' observations'
-            # print "max_convergence_time_composite is:"
-            # print str(max_convergence_time_composite)+' observations'
-
-
-        if run_type == 'population_same_pop_dist_learner':
-            #TODO: Do something here
-            pass
-
-
-        elif run_type == 'population_same_pop' or run_type == 'population_diff_pop':
-            percentiles_convergence_time_over_theta_perspective = measur.calc_convergence_time_over_theta_range_percentiles(multi_run_log_posterior_matrix, majority_p_hyp_indices, theta_range)
-            # print 
-            # print 
-            # print "percentiles_convergence_time_over_theta_perspective are:"
-            # print percentiles_convergence_time_over_theta_perspective
-            # print "percentiles_convergence_time_over_theta_perspective.shape are:"
-            # print percentiles_convergence_time_over_theta_perspective.shape
-
-            percentiles_convergence_time_over_theta_lexicon = measur.calc_convergence_time_over_theta_range_percentiles(multi_run_log_posterior_matrix, majority_lex_hyp_indices, theta_range)
-            # print 
-            # print 
-            # print "percentiles_convergence_time_over_theta_lexicon are:"
-            # print percentiles_convergence_time_over_theta_lexicon
-            # print "percentiles_convergence_time_over_theta_lexicon.shape are:"
-            # print percentiles_convergence_time_over_theta_lexicon.shape
-
-            percentiles_convergence_time_over_theta_composite = measur.calc_convergence_time_over_theta_range_percentiles(multi_run_log_posterior_matrix, majority_composite_hyp_indices, theta_range)
-            # print 
-            # print 
-            # print "percentiles_convergence_time_over_theta_composite are:"
-            # print percentiles_convergence_time_over_theta_composite
-            # print "percentiles_convergence_time_over_theta_composite.shape are:"
-            # print percentiles_convergence_time_over_theta_composite.shape
-
-
         if run_type == 'population_same_pop_dist_learner':
 
             learner_hypothesis_space = results_dict['learner_hypothesis_space']
@@ -812,50 +729,6 @@ if __name__ == "__main__":
             # print percentiles_cumulative_belief_composite.shape
             # print "np.mean(percentiles_cumulative_belief_composite) is:"
             # print np.mean(percentiles_cumulative_belief_composite)
-
-
-        elif run_type == 'population_same_pop' or run_type == 'population_diff_pop':
-
-            percentiles_p_hyp_posterior_mass_correct = measur.calc_hyp_correct_posterior_mass_percentiles(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, majority_p_hyp_indices)
-            # print 
-            # print 
-            # print "percentiles_p_hyp_posterior_mass_correct is:"
-            # print percentiles_p_hyp_posterior_mass_correct
-            # print "percentiles_p_hyp_posterior_mass_correct[0].shape is:"
-            # print percentiles_p_hyp_posterior_mass_correct[0].shape
-
-            percentiles_lex_hyp_posterior_mass_correct = measur.calc_hyp_correct_posterior_mass_percentiles(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, majority_lex_hyp_indices)
-            # print 
-            # print 
-            # print "percentiles_lex_hyp_posterior_mass_correct is:"
-            # print percentiles_lex_hyp_posterior_mass_correct
-            # print "percentiles_lex_hyp_posterior_mass_correct[0].shape is:"
-            # print percentiles_lex_hyp_posterior_mass_correct[0].shape
-
-            percentiles_composite_hyp_posterior_mass_correct = measur.calc_hyp_correct_posterior_mass_percentiles(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, majority_composite_hyp_indices)
-            # print 
-            # print 
-            # print "percentiles_composite_hyp_posterior_mass_correct is:"
-            # print percentiles_composite_hyp_posterior_mass_correct
-            # print "percentiles_composite_hyp_posterior_mass_correct[0].shape is:"
-            # print percentiles_composite_hyp_posterior_mass_correct[0].shape
-
-
-        if run_type == 'population_same_pop_dist_learner':
-            #TODO: Do something here
-            pass
-
-        elif run_type == 'population_same_pop' or run_type == 'population_diff_pop':
-
-            majority_lexicon = results_dict['majority_lexicon']
-
-            percentiles_lex_approximation_posterior_mass = measur.calc_lex_approximation_posterior_mass(multi_run_log_posterior_matrix, majority_lexicon, lexicon_hyps)
-            # print 
-            # print 
-            # print "percentiles_lex_approximation_posterior_mass is:"
-            # print percentiles_lex_approximation_posterior_mass
-            # print "percentiles_lex_approximation_posterior_mass[0].shape is:"
-            # print percentiles_lex_approximation_posterior_mass[0].shape
 
 
         if run_type == 'population_same_pop_dist_learner':
@@ -1002,14 +875,6 @@ if __name__ == "__main__":
 
     if run_type == 'population_same_pop' or run_type == 'population_diff_pop':
         scores_plot_title = 'Posterior probability assigned to the correct (part) hypothesis over time'
-
-        plots.plot_timecourse_scores_percentiles(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
-
-
-        plots.plot_timecourse_scores_percentiles_without_error_median(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
-
-
-        plots.plot_timecourse_scores_percentiles_without_error_mean(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct, percentiles_lex_hyp_posterior_mass_correct)
 
         hypotheses_plot_title = 'Posterior probability assigned to each composite hypothesis over time'
 

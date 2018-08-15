@@ -745,7 +745,7 @@ if __name__ == "__main__":
     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(n_runs, n_iterations, pop_size, multi_run_selected_hyps_per_generation_matrix, argsort_informativity_per_lexicon)
 
 
-    hypothesis_count_proportions, yerr_scaled_selected_hyps_for_plot = calc_mean_and_conf_invs_distribution(n_runs, n_copies, lexicon_hyps, which_hyps_on_graph, min_info_indices, intermediate_info_indices, max_info_indices, n_iterations, cut_off_point, selected_hyps_new_lex_order_all_runs)
+    hypothesis_count_proportions, yerr_scaled_selected_hyps_for_plot = calc_mean_and_conf_invs_distribution(n_runs, 1, lexicon_hyps, which_hyps_on_graph, min_info_indices, intermediate_info_indices, max_info_indices, n_iterations, cut_off_point, selected_hyps_new_lex_order_all_runs)
     print ''
     print ''
     print "hypothesis_count_proportions are:"

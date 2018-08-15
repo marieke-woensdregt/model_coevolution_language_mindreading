@@ -1,7 +1,6 @@
 __author__ = 'Marieke Woensdregt'
 
 import numpy as np
-import params
 import string
 
 

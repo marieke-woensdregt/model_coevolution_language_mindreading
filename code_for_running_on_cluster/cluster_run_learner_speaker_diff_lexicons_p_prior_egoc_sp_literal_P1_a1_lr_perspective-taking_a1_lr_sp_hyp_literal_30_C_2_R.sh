@@ -3,7 +3,7 @@
 #$ -N run_learner_speaker_diff_lexicons_p_prior_egoc_sp_literal_P1_a1_lr_perspective-taking_a1_lr_sp_hyp_literal_30_C_2_R
 #$ -cwd
 #$ -pe sharedmem 1
-#$ -l h_vmem=1G
+#$ -l h_vmem=1.5G
 #$ -l h_rt=02:00:00
 #$ -t 1-343
 #  These options are:

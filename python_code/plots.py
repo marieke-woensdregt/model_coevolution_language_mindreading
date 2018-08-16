@@ -33,26 +33,26 @@ def create_one_to_one_bias_data_for_plotting():
     return diff_bias_strengths_array, beta_range
 
 
-    def plot_lex_distribution(plot_file_path, plot_file_title, plot_title, hypothesis_count_proportions, conf_intervals, cut_off_point, text_size):
-        sns.set_style("whitegrid")
-        sns.set_palette("deep")
-        sns.set(font_scale=text_size)
-        lex_type_labels = ['Optimal', 'Partly informative', 'Uninformative']
-        ind = np.arange(len(lex_type_labels))
-        width = 0.25
-        with sns.axes_style("whitegrid"):
-            fig, ax = plt.subplots()
-            ax.bar(ind+0.125, hypothesis_count_proportions, width, yerr=conf_intervals, error_kw=dict(ecolor='black', lw=1, capsize=5, capthick=1))
-        ax.axhline((1./float(len(lex_type_labels))), color='0.6', linestyle='--')
-        ax.set_ylim(0.0, 1.0)
-        ax.set_xticks([0.25, 1.25, 2.25])
-        ax.set_xticklabels(lex_type_labels)
-        ax.set_xlabel('Language types', labelpad=10)
-        ax.set_ylabel('Proportion over generations', labelpad=10)
-        ax.set_title(plot_title, y=1.05, fontweight='bold')
-        plt.gcf().subplots_adjust(bottom=0.15, top=0.85)  # This makes room for the xlabel and title
-        plt.savefig(plot_file_path+'Plot_Prop_Hyps'+plot_file_title+'_cutoff_'+str(cut_off_point)+'.png')
-        plt.show()
+def plot_lex_distribution(plot_file_path, plot_file_title, plot_title, hypothesis_count_proportions, conf_intervals, cut_off_point, text_size):
+    sns.set_style("whitegrid")
+    sns.set_palette("deep")
+    sns.set(font_scale=text_size)
+    lex_type_labels = ['Optimal', 'Partly informative', 'Uninformative']
+    ind = np.arange(len(lex_type_labels))
+    width = 0.25
+    with sns.axes_style("whitegrid"):
+        fig, ax = plt.subplots()
+        ax.bar(ind+0.125, hypothesis_count_proportions, width, yerr=conf_intervals, error_kw=dict(ecolor='black', lw=1, capsize=5, capthick=1))
+    ax.axhline((1./float(len(lex_type_labels))), color='0.6', linestyle='--')
+    ax.set_ylim(0.0, 1.0)
+    ax.set_xticks([0.25, 1.25, 2.25])
+    ax.set_xticklabels(lex_type_labels)
+    ax.set_xlabel('Language types', labelpad=10)
+    ax.set_ylabel('Proportion over generations', labelpad=10)
+    ax.set_title(plot_title, y=1.05, fontweight='bold')
+    plt.gcf().subplots_adjust(bottom=0.15, top=0.85)  # This makes room for the xlabel and title
+    plt.savefig(plot_file_path+'Plot_Prop_Hyps'+plot_file_title+'_cutoff_'+str(cut_off_point)+'.png')
+    plt.show()
 
 
 

@@ -213,6 +213,7 @@ which_hyps_on_graph = 'all_hyps'  # This is used in the plot_post_probs_over_lex
 
 lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or 'ca' for communicative accuracy (of the lexicon with itself)
 
+posterior_threshold = 0.95  # This parameter is used by the 'measur_n_data_points_for_p_learning' function
 
 decoupling = True  # This can be set to either True or False. It determines whether genetic and cultural inheritance are coupled (i.e. from the same cultural parent) or decoupled.
 
@@ -559,7 +560,7 @@ def multi_runs_iteration(n_meanings, n_signals, n_runs, n_iterations, report_eve
 
 
 
-def measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspective_probs, multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix):
+def measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspective_probs, multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix, posterior_threshold):
     comp_hyp_indices = np.arange(len(hypothesis_space))
     comp_hyp_indices_split_on_p_hyps = np.split(comp_hyp_indices, len(perspectives))
     correct_p_index = np.where(perspective_probs == 1.0)
@@ -800,7 +801,7 @@ if __name__ == "__main__":
 
     if recording == 'everything':
 
-        min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 = measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspective_probs, multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix)
+        min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 = measur_n_data_points_for_p_learning(hypothesis_space, perspectives, perspective_probs, multi_run_log_posteriors_per_data_point_per_agent_per_generation_matrix, posterior_threshold)
 
 
         print "min_n_data_points_per_agent_per_generation_per_run_p_prior_neutral_00_l_prior_neutral_00 is:"

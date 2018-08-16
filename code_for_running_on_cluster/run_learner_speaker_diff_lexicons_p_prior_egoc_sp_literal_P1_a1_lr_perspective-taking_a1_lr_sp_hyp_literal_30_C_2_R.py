@@ -20,7 +20,7 @@ speaker_lex_index = int(sys.argv[1])-1 #NOTE: first argument in sys.argv list is
 #######################################################################################################################
 # 1. THE PARAMETERS:
 
-# 1.1: Set the path to the results_directory on your cluster account where you want the results to be stored if you don't want the results to be stored in the folder from which you're running the array job:
+# 1.1: Set the path to the output_pickle_file_directory on your cluster account where you want the results to be stored if you don't want the results to be stored in the folder from which you're running the array job:
 results_directory = ''
 
 
@@ -166,52 +166,50 @@ lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or '
 if __name__ == "__main__":
 
 
-    if n_runs > 0 and run_type == 'dyadic':
+    t0 = time.clock()
 
-        t0 = time.clock()
-
-        all_results_dict = multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant)
+    all_results_dict = multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant)
 
 
-        run_simulation_time = time.clock()-t0
-        print 
-        print 'run_simulation_time is:'
-        print str((run_simulation_time/60))+" m"
+    run_simulation_time = time.clock()-t0
+    print
+    print 'run_simulation_time is:'
+    print str((run_simulation_time/60))+" m"
 
 
 
-        multi_run_log_posterior_matrix = all_results_dict['multi_run_log_posterior_matrix']
+    multi_run_log_posterior_matrix = all_results_dict['multi_run_log_posterior_matrix']
 
-        mean_final_posteriors = measur.calc_mean_of_final_posteriors(multi_run_log_posterior_matrix)
+    mean_final_posteriors = measur.calc_mean_of_final_posteriors(multi_run_log_posterior_matrix)
 
-        std_final_posteriors = measur.calc_std_of_final_posteriors(multi_run_log_posterior_matrix)
-
-
-        mean_std_final_posteriors_dict = {'mean_final_posteriors':mean_final_posteriors,
-                                          'std_final_posteriors':std_final_posteriors}
+    std_final_posteriors = measur.calc_std_of_final_posteriors(multi_run_log_posterior_matrix)
 
 
-    #############################################################################
-    # Below the results are written to pickle files:
+    mean_std_final_posteriors_dict = {'mean_final_posteriors':mean_final_posteriors,
+                                      'std_final_posteriors':std_final_posteriors}
+
+
+#############################################################################
+# Below the results are written to pickle files:
 
 
 
 
-        if context_generation == 'random':
-            file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
+    if context_generation == 'random':
+        file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
 
-        elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_C'+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
-
-
-        pickle_file_title_all_results = results_directory + 'Results_' + file_title
-
-        saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
+    elif context_generation == 'only_helpful' or context_generation == 'optimal':
+        file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_C'+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
 
 
-        pickle_file_title_mean_std_final_posteriors = results_directory + 'Mean_Std_Final_Post_' + file_title
+    pickle_file_title_all_results = results_directory + 'Results_' + file_title
 
-        saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
+    saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
+
+
+    pickle_file_title_mean_std_final_posteriors = results_directory + 'Mean_Std_Final_Post_' + file_title
+
+    saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
 
 
 

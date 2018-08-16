@@ -189,7 +189,7 @@ run_type = 'iter'  # This parameter determines whether the learner communicates 
 
 communication_type = 'prag'  # This can be set to either 'lex_only', 'lex_n_context', 'lex_n_p' or 'prag'
 ca_measure_type = 'comp_only'  # This can be set to either "comp_n_prod" or "comp_only"
-n_interactions = 30  # The number of interactions used to calculate communicative accuracy
+n_interactions = 6  # The number of interactions used to calculate communicative accuracy
 
 selection_type = 'ca_with_parent'  # This can be set to either 'none' or 'p_taking'
 selection_weighting = 'none'  # This is a factor with which the fitness of the agents (determined as the probability they assign to the correct perspective hypothesis) is multiplied and then exponentiated in order to weight the relative agent fitness (which in turn determines the probability of becoming a teacher for the next generation). A value of 0. implements neutral selection. A value of 1.0 creates weighting where the fitness is pretty much equal to relative posterior probability on correct p hyp), and the higher the value, the more skewed the weighting in favour of agents with better perspective-taking.

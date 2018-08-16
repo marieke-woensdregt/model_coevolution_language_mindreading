@@ -10,4 +10,4 @@ The code in this folder is meant for doing a quick test run with only 30 observa
 
 
 ## Navigating the code
-Throughout these modules I used a mixture of object-oriented programming and regular functions, and explained how each function, class or method works using docstrings and comments. I also used long and intelligible variable and function names, which should hopefully make the code relatively easy to read.
+Both the python scripts and the .sh scripts in this folder contain comments and docstrings explaining what each line or function does. I also used long and intelligible variable and function names, which should hopefully make the code relatively easy to read.

@@ -1,20 +1,18 @@
 __author__ = 'Marieke Woensdregt'
 
+
 import numpy as np
+import sys
 import time
+
 import hypspace
 import measur
-from run_sim_learner_speaker_for_cluster import multi_runs_dyadic
+from run_sim_learner_speaker_for_eddie import multi_runs_dyadic
 import saveresults
-import sys
-
 
 
 # Setting the speaker_lex_index parameter based on the command-line input:
 speaker_lex_index = int(sys.argv[1])-1 #NOTE: first argument in sys.argv list is always the name of the script
-
-
-
 
 
 #######################################################################################################################

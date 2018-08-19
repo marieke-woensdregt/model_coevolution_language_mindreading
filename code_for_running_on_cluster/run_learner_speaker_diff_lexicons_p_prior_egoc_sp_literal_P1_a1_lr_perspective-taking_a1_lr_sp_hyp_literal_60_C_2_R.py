@@ -1,13 +1,14 @@
 __author__ = 'Marieke Woensdregt'
 
 
+import joblib
 import numpy as np
+import pickle
 import sys
 import time
 
 import hypspace
-import measur
-from run_sim_learner_speaker_for_eddie import multi_runs_dyadic
+from run_sim_learner_speaker_for_cluster import multi_runs_dyadic
 import saveresults
 
 
@@ -159,14 +160,12 @@ lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or '
 
 
 
-
-
 if __name__ == "__main__":
 
 
     t0 = time.clock()
 
-    all_results_dict = multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant)
+    multi_run_log_posterior_matrix, extra_measures_dict = multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant)
 
 
     run_simulation_time = time.clock()-t0
@@ -174,17 +173,6 @@ if __name__ == "__main__":
     print 'run_simulation_time is:'
     print str((run_simulation_time/60))+" m"
 
-
-
-    multi_run_log_posterior_matrix = all_results_dict['multi_run_log_posterior_matrix']
-
-    mean_final_posteriors = measur.calc_mean_of_final_posteriors(multi_run_log_posterior_matrix)
-
-    std_final_posteriors = measur.calc_std_of_final_posteriors(multi_run_log_posterior_matrix)
-
-
-    mean_std_final_posteriors_dict = {'mean_final_posteriors':mean_final_posteriors,
-                                      'std_final_posteriors':std_final_posteriors}
 
 
 #############################################################################
@@ -200,14 +188,12 @@ if __name__ == "__main__":
         file_title = run_type+'_'+str(n_runs)+'_R_'+str(int(n_meanings))+'_M_'+str(int(n_signals))+'_S_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_C'+'_err_'+error_string+'_sp_'+pragmatic_level_speaker+'_sp_a_'+str(optimality_alpha_speaker)[0]+'_sp_lex_'+speaker_lex_type[:-4]+'_index_'+str(speaker_lex_index)+'_sp_p_'+str(speaker_perspective)[0]+'_lr_'+pragmatic_level_learner+'_lr_a_'+str(optimality_alpha_learner)[0]+'_lr_sp_hyp_'+pragmatic_level_sp_hyp_lr+'_'+learner_learning_type+'_lex_prior_'+lexicon_prior_type+'_'+lexicon_prior_constant_string+'_p_prior_'+perspective_prior_type+'_'+perspective_prior_strength_string+'_'+str(int(n_contexts))+'_C_'+str(int(n_utterances))+'_U_'+lex_measure
 
 
-    pickle_file_title_all_results = results_directory + 'Results_' + file_title
+    filename_multi_run_log_posterior_matrix = results_directory + 'Multi_Run_Posterior_Matrix_' + file_title
 
-    saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
-
-
-    pickle_file_title_mean_std_final_posteriors = results_directory + 'Mean_Std_Final_Post_' + file_title
-
-    saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
+    joblib.dump(multi_run_log_posterior_matrix, filename_multi_run_log_posterior_matrix+'.z')
 
 
+    filename_extra_measures_dict = results_directory + 'Extra_Measures_Dict_' + file_title
+
+    pickle.dump(extra_measures_dict, open(filename_extra_measures_dict+'.p', 'wb'))
 

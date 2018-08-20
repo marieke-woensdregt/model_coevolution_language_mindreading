@@ -178,4 +178,4 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
 
     results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'mean_posteriors_over_observations':mean_posteriors_over_observations, 'std_posteriors_over_observations':std_posteriors_over_observations, 'percentiles_posteriors_over_observations':percentiles_posteriors_over_observations, 'correct_p_hyp_indices':correct_p_hyp_indices, 'correct_lex_hyp_indices':correct_lex_hyp_indices, 'correct_composite_hyp_indices':correct_composite_hyp_indices, 'speaker_lexicon':speaker.lexicon.lexicon,
     'run_time_mins':run_time_mins}
-    return multi_run_log_posterior_matrix, extra_measures_dict
+    return results_dict

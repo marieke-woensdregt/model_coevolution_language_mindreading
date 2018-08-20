@@ -3,13 +3,12 @@ __author__ = 'Marieke Woensdregt'
 
 import numpy as np
 import time
+
 import context
 import lex
 import measur
 from pop import Agent, PragmaticAgent
 import prior
-
-
 
 
 def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, speaker_lex_type, speaker_lex_index, error, extra_error, pragmatic_level_speaker, optimality_alpha_speaker, pragmatic_level_learner, optimality_alpha_learner, speaker_perspective, sal_alpha, speaker_learning_type, learner_perspective, learner_lex_type, learner_learning_type, pragmatic_level_sp_hyp_lr, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
@@ -110,6 +109,13 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
         elif context_generation == 'optimal':
             context_matrix = context.gen_helpful_context_matrix_fixed_order(n_meanings, n_contexts, helpful_contexts)
 
+
+        # if r == 0:
+        #     print ''
+        #     print 'contexts are:'
+        #     print context_matrix[0:len(helpful_contexts)]
+
+        # TODO: Figure out why it is that the composite_log_priors_population are not treated as a global variable but rather as a local variable of the learner object that gets updated as learner.log_posteriors get updated --> I think the solution might be to declare it 'global' somewhere in the Agent class
         perspective_prior = prior.create_perspective_prior(perspective_hyps, lexicon_hyps, perspective_prior_type, learner_perspective, perspective_prior_strength)
         lexicon_prior = prior.create_lexicon_prior(lexicon_hyps, lexicon_prior_type, lexicon_prior_constant, error)
         composite_log_priors = prior.list_composite_log_priors('no_p_distinction', 1, hypothesis_space, perspective_hyps, lexicon_hyps, perspective_prior, lexicon_prior) # These have to be recalculated fresh after every run so that each new learner is initialized with the original prior distribution, rather than the final posteriors of the last learner!
@@ -124,6 +130,12 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
             learner = PragmaticAgent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, learner_perspective, sal_alpha, learner_lexicon, learner_learning_type, pragmatic_level_sp_hyp_lr, pragmatic_level_learner, optimality_alpha_learner, extra_error)
 
 
+        if r == 0:
+            # print "The learner's prior distribution is:"
+            # print np.exp(learner.log_priors)
+            print "The number of hypotheses is:"
+            print len(learner.log_priors)
+
         if pragmatic_level_speaker == 'literal':
             speaker = Agent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, speaker_perspective, sal_alpha, speaker_lexicon, speaker_learning_type)
         elif pragmatic_level_speaker == 'perspective-taking':
@@ -135,6 +147,15 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
         log_posteriors_per_data_point_matrix = learner.inference(n_contexts, n_utterances, data, error)
         correct_p_hyp_indices = measur.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'perspective')
 
+
+        # print
+        # print 'data is:'
+        # print data.print_data()
+
+
+
+        # FIXME: If I want the half_ambiguous lexicon to be generated with the ambiguous mappings chosen at random, I have to make sure that the majority_lex_hyp_indices and majority_composite_hyp_index are logged for each run separately
+
         if r == 0:
             correct_lex_hyp_indices = measur.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'lexicon')
             correct_composite_hyp_indices = measur.find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker.perspective, speaker.lexicon.lexicon, 'composite')
@@ -142,8 +163,19 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
         multi_run_utterances_matrix[r] = data.utterances
         multi_run_log_posterior_matrix[r] = log_posteriors_per_data_point_matrix
 
+
+
+    mean_posteriors_over_observations = np.mean(np.exp(multi_run_log_posterior_matrix), axis=0)
+
+    std_posteriors_over_observations = np.std(np.exp(multi_run_log_posterior_matrix), axis=0)
+
+    first_quartile_posteriors_over_observations = np.percentile(np.exp(multi_run_log_posterior_matrix), q=25, axis=0)
+    median_posteriors_over_observations = np.percentile(np.exp(multi_run_log_posterior_matrix), q=50, axis=0)
+    third_quartile_posteriors_over_observations = np.percentile(np.exp(multi_run_log_posterior_matrix), q=75, axis=0)
+    percentiles_posteriors_over_observations = np.array([first_quartile_posteriors_over_observations, median_posteriors_over_observations, third_quartile_posteriors_over_observations])
+
     run_time_mins = (time.clock()-t0)/60.
 
-    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix, 'correct_p_hyp_indices':correct_p_hyp_indices, 'correct_lex_hyp_indices':correct_lex_hyp_indices, 'correct_composite_hyp_indices':correct_composite_hyp_indices, 'speaker_lexicon':speaker.lexicon.lexicon,
+    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'mean_posteriors_over_observations':mean_posteriors_over_observations, 'std_posteriors_over_observations':std_posteriors_over_observations, 'percentiles_posteriors_over_observations':percentiles_posteriors_over_observations, 'correct_p_hyp_indices':correct_p_hyp_indices, 'correct_lex_hyp_indices':correct_lex_hyp_indices, 'correct_composite_hyp_indices':correct_composite_hyp_indices, 'speaker_lexicon':speaker.lexicon.lexicon,
     'run_time_mins':run_time_mins}
-    return results_dict
+    return multi_run_log_posterior_matrix, extra_measures_dict

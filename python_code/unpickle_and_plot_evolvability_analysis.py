@@ -193,7 +193,7 @@ n_runs = 200
 decoupling = True  # This can be set to either True or False. It determines whether genetic and cultural inheritance are coupled (i.e. from the same cultural parent) or decoupled.
 
 
-line_style = 'divided_by_genes'  # this can be set to either 'unit_traces' or 'indiv_runs'
+line_style = 'indiv_runs'  # this can be set to either 'divided_by_genes', 'unit_traces' or 'indiv_runs'
 legend = False  # either true or false
 
 
@@ -336,7 +336,7 @@ def unpickle_ca_per_lex():
 
 
 
-    # lexicon_hyps_sorted_unpickled = pickle.load(open(results_directory+'lexicon_hyps_sorted.p', "rb" ))
+    # lexicon_hyps_sorted_unpickled = pickle.load(open(output_pickle_file_directory+'lexicon_hyps_sorted.p', "rb" ))
     # print ' '
     # # print "lexicon_hyps_sorted_unpickled  is:"
     # # print lexicon_hyps_sorted_unpickled
@@ -344,7 +344,7 @@ def unpickle_ca_per_lex():
     # print lexicon_hyps_sorted_unpickled.shape
     #
     #
-    # informativity_per_lexicon_sorted_unpickled = pickle.load(open(results_directory+'informativity_per_lexicon_sorted.p', "rb" ))
+    # informativity_per_lexicon_sorted_unpickled = pickle.load(open(output_pickle_file_directory+'informativity_per_lexicon_sorted.p', "rb" ))
     # print ' '
     # # print "informativity_per_lexicon_sorted_unpickled is:"
     # # print informativity_per_lexicon_sorted_unpickled
@@ -851,174 +851,172 @@ if __name__ == "__main__":
 
 
 
-    # ###############################################################################
-    # selection_type = 'none'
-    # pragmatic_level_initial_pop = 'literal'
-    #
-    #
-    # pragmatic_level_per_agent_matrix_per_run_select_none, avg_fitness_per_gen_per_run_select_none, selected_hyps_per_generation_matrix_per_run_select_none, selected_parent_indices_matrix_per_run_select_none = unpickle_results_multi_runs(n_runs, selection_type)
-    #
-    # print ''
-    # print ''
-    # # print "pragmatic_level_per_agent_matrix_per_run_select_none is:"
-    # # print pragmatic_level_per_agent_matrix_per_run_select_none
-    # print "len(pragmatic_level_per_agent_matrix_per_run_select_none) is:"
-    # print len(pragmatic_level_per_agent_matrix_per_run_select_none)
-    #
-    # print ''
-    # print ''
-    # # print "avg_fitness_per_gen_per_run_select_none is:"
-    # # print avg_fitness_per_gen_per_run_select_none
-    # print "avg_fitness_per_gen_per_run_select_none.shape is:"
-    # print avg_fitness_per_gen_per_run_select_none.shape
-    #
-    # print ''
-    # print ''
-    # # print "selected_hyps_per_generation_matrix_per_run_select_none is:"
-    # # print selected_hyps_per_generation_matrix_per_run_select_none
-    # print "selected_hyps_per_generation_matrix_per_run_select_none.shape is:"
-    # print selected_hyps_per_generation_matrix_per_run_select_none.shape
-    #
-    #
-    # proportion_pragmatic_agents_over_gens_per_run_select_none = calc_proportion_pragmatic_level_per_run(pragmatic_level_per_agent_matrix_per_run_select_none, n_runs, n_iterations_mixed_pop_original, pop_size_mixed_pop, 'prag')
-    # print ''
-    # print ''
-    # print "proportion_pragmatic_agents_over_gens_per_run_select_none.shape is:"
-    # print proportion_pragmatic_agents_over_gens_per_run_select_none.shape
-    # print ''
-    # print "np.mean(proportion_pragmatic_agents_over_gens_per_run_select_none) is:"
-    # print np.mean(proportion_pragmatic_agents_over_gens_per_run_select_none)
-    #
-    #
-    #
-    #
-    # pragmatic_parents_selected_count_matrix_select_none = calc_no_pragmatic_parents_per_pragmatic_agent(pragmatic_level_per_agent_matrix_per_run_select_none, n_runs, n_iterations_mixed_pop_original, pop_size_mixed_pop, 'prag', selected_parent_indices_matrix_per_run_select_none)
-    # print ''
-    # print ''
-    # print ''
-    # print ''
-    # print "pragmatic_parents_selected_count_matrix_select_none is:"
-    # print pragmatic_parents_selected_count_matrix_select_none
-    # print "pragmatic_parents_selected_count_matrix_select_none.shape is:"
-    # print pragmatic_parents_selected_count_matrix_select_none.shape
-    #
-    #
-    #
-    # print ''
-    # print ''
-    # print "selected_hyps_per_generation_matrix_per_run_select_none.shape is:"
-    # print selected_hyps_per_generation_matrix_per_run_select_none.shape
-    #
-    # selected_hyps_new_lex_order_all_runs_select_none = get_selected_hyps_ordered(selected_hyps_per_generation_matrix_per_run_select_none, argsort_informativity_per_lexicon)
-    # print ''
-    # print ''
-    # # print "selected_hyps_new_lex_order_all_runs_select_none is:"
-    # # print selected_hyps_new_lex_order_all_runs_select_none
-    # print "selected_hyps_new_lex_order_all_runs_select_none.shape is:"
-    # print selected_hyps_new_lex_order_all_runs_select_none.shape
-    #
-    # avg_inf_over_gens_matrix_select_none = avg_informativity_over_gens(n_runs, 1, n_iterations_mixed_pop_original, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs_select_none)
-    # # print "avg_inf_over_gens_matrix_select_none is:"
-    # # print avg_inf_over_gens_matrix_select_none
-    # print "avg_inf_over_gens_matrix_select_none.shape is:"
-    # print avg_inf_over_gens_matrix_select_none.shape
-    #
-    #
-    # mean_inf_over_gens_select_none, conf_intervals_inf_over_gens_select_none = calc_mean_and_conf_invs_over_gens(avg_inf_over_gens_matrix_select_none)
-    # print ''
-    # print ''
-    # # print "mean_inf_over_gens_select_none is:"
-    # # print mean_inf_over_gens_select_none
-    # print "mean_inf_over_gens_select_none.shape is:"
-    # print mean_inf_over_gens_select_none.shape
-    # print ''
-    # # print "conf_intervals_inf_over_gens_select_none is:"
-    # # print conf_intervals_inf_over_gens_select_none
-    # print "conf_intervals_inf_over_gens_select_none.shape is:"
-    # print conf_intervals_inf_over_gens_select_none.shape
-    #
-    #
-    # percentiles_inf_over_gens_select_none = calc_percentiles_over_gens(avg_inf_over_gens_matrix_select_none)
-    # print ''
-    # print ''
-    # # print "percentiles_inf_over_gens_select_none is:"
-    # # print percentiles_inf_over_gens_select_none
-    # print "percentiles_inf_over_gens_select_none.shape is:"
-    # print percentiles_inf_over_gens_select_none.shape
-    #
-    #
-    #
-    #
-    # avg_pragmatic_advantage_over_gens_matrix_select_none = avg_pragmatic_advantage_over_gens(n_runs, 1, n_iterations_mixed_pop_original, pragmatic_advantage_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs_select_none)
-    # # print "avg_pragmatic_advantage_over_gens_matrix_select_none is:"
-    # # print avg_pragmatic_advantage_over_gens_matrix_select_none
-    # print "avg_pragmatic_advantage_over_gens_matrix_select_none.shape is:"
-    # print avg_pragmatic_advantage_over_gens_matrix_select_none.shape
-    #
-    #
-    # mean_pragmatic_advantage_over_gens_select_none, conf_intervals_pragmatic_advantage_over_gens_select_none = calc_mean_and_conf_invs_over_gens(avg_pragmatic_advantage_over_gens_matrix_select_none)
-    # print ''
-    # print ''
-    # # print "mean_pragmatic_advantage_over_gens_select_none is:"
-    # # print mean_pragmatic_advantage_over_gens_select_none
-    # print "mean_pragmatic_advantage_over_gens_select_none.shape is:"
-    # print mean_pragmatic_advantage_over_gens_select_none.shape
-    # print ''
-    # # print "conf_intervals_pragmatic_advantage_over_gens_select_none is:"
-    # # print conf_intervals_pragmatic_advantage_over_gens_select_none
-    # print "conf_intervals_pragmatic_advantage_over_gens_select_none.shape is:"
-    # print conf_intervals_pragmatic_advantage_over_gens_select_none.shape
-    #
-    #
-    # percentiles_pragmatic_advantage_over_gens_select_none = calc_percentiles_over_gens(avg_pragmatic_advantage_over_gens_matrix_select_none)
-    # print ''
-    # print ''
-    # # print "percentiles_pragmatic_advantage_over_gens_select_none is:"
-    # # print percentiles_pragmatic_advantage_over_gens_select_none
-    # print "percentiles_pragmatic_advantage_over_gens_select_none.shape is:"
-    # print percentiles_pragmatic_advantage_over_gens_select_none.shape
-    #
-    #
-    #
-    #
-    # if context_generation == 'random':
-    #     if selection_type == 'none' or selection_type == 'l_learning':
-    #         plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop_original)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
-    #     elif selection_type == 'p_taking':
-    #         plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop_original)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
-    #     elif selection_type == 'ca_with_parent':
-    #         plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_init_'+communication_type_initial_pop+'_'+ca_measure_type_initial_pop+'_mutnts_'+communication_type_mutants+'_'+ca_measure_type_mutants+'_'+str(n_iterations_mixed_pop_original)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
-    #
-    # elif context_generation == 'only_helpful' or context_generation == 'optimal':
-    #     if selection_type == 'none' or selection_type == 'l_learning':
-    #         plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop_original)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
-    #     elif selection_type == 'p_taking':
-    #         plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop_original)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
-    #     elif selection_type == 'ca_with_parent':
-    #         plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_init_'+communication_type_initial_pop+'_'+ca_measure_type_initial_pop+'_mutnts_'+communication_type_mutants+'_'+ca_measure_type_mutants+'_'+str(n_iterations_mixed_pop_original)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
-    #
-    #
-    #
-    # plot_title = 'No selection'
-    #
-    #
-    # plot_title = 'Prop. prag. agents / gens w/ select '+selection_type
-    #
-    # plot_proportion_over_gens(plot_directory+'Plot_prop_prag_agents_'+plot_filename+'_'+line_style, plot_title, np.arange(1, len(proportion_pragmatic_agents_over_gens_per_run_select_none[0])+1), 'generations', 'proportion pragmatic agents', proportion_pragmatic_agents_over_gens_per_run_select_none, proportion_pragmatic_agents_over_gens_per_run_select_none, line_style, legend, legend_loc='center right', y_lim=[-0.05, 1.05])
-    #
-    #
-    # plot_title = 'Avg. informativeness / gens w/ select '+selection_type
-    #
-    # plot_proportion_over_gens(plot_directory+'Plot_avg_info_'+plot_filename+'_'+line_style, plot_title, np.arange(2, len(avg_fitness_per_gen_per_run_select_none[0][1:])+2), 'generations', 'average informativeness', proportion_pragmatic_agents_over_gens_per_run_select_none[:,1:], avg_inf_over_gens_matrix_select_none[:,1:], line_style, legend, legend_loc='lower right', y_lim=[0.0, max_inf+0.05])
-    #
-    #
-    #
-    #
-    # plot_title = 'Avg. prag. benefit / gens w/ select '+selection_type
-    #
-    # plot_proportion_over_gens(plot_directory+'Plot_avg_pragmatic_advantage_'+plot_filename+'_'+line_style, plot_title, np.arange(2, len(avg_pragmatic_advantage_over_gens_matrix_select_none[0][1:])+2), 'generations', 'average pragmatic benefit in ca', proportion_pragmatic_agents_over_gens_per_run_select_none[:,1:], avg_pragmatic_advantage_over_gens_matrix_select_none[:,1:], line_style, legend, legend_loc='upper right', y_lim=[0.0, 0.425]) #y_lim=[0.0, max_advantage+0.025])
-    #
-    #
+    ###############################################################################
+    selection_type = 'none'
+    pragmatic_level_initial_pop = 'literal'
+
+
+    pragmatic_level_per_agent_matrix_per_run_select_none, avg_fitness_per_gen_per_run_select_none, selected_hyps_per_generation_matrix_per_run_select_none, selected_parent_indices_matrix_per_run_select_none = unpickle_results_multi_runs(n_runs, selection_type)
+
+    print ''
+    print ''
+    # print "pragmatic_level_per_agent_matrix_per_run_select_none is:"
+    # print pragmatic_level_per_agent_matrix_per_run_select_none
+    print "len(pragmatic_level_per_agent_matrix_per_run_select_none) is:"
+    print len(pragmatic_level_per_agent_matrix_per_run_select_none)
+
+    print ''
+    print ''
+    # print "avg_fitness_per_gen_per_run_select_none is:"
+    # print avg_fitness_per_gen_per_run_select_none
+    print "avg_fitness_per_gen_per_run_select_none.shape is:"
+    print avg_fitness_per_gen_per_run_select_none.shape
+
+    print ''
+    print ''
+    # print "selected_hyps_per_generation_matrix_per_run_select_none is:"
+    # print selected_hyps_per_generation_matrix_per_run_select_none
+    print "selected_hyps_per_generation_matrix_per_run_select_none.shape is:"
+    print selected_hyps_per_generation_matrix_per_run_select_none.shape
+
+
+    proportion_pragmatic_agents_over_gens_per_run_select_none = calc_proportion_pragmatic_level_per_run(pragmatic_level_per_agent_matrix_per_run_select_none, n_runs, n_iterations_mixed_pop, pop_size_mixed_pop, 'prag')
+    print ''
+    print ''
+    print "proportion_pragmatic_agents_over_gens_per_run_select_none.shape is:"
+    print proportion_pragmatic_agents_over_gens_per_run_select_none.shape
+    print ''
+    print "np.mean(proportion_pragmatic_agents_over_gens_per_run_select_none) is:"
+    print np.mean(proportion_pragmatic_agents_over_gens_per_run_select_none)
+
+
+    pragmatic_parents_selected_count_matrix_select_none = calc_no_pragmatic_parents_per_pragmatic_agent(pragmatic_level_per_agent_matrix_per_run_select_none, n_runs, n_iterations_mixed_pop, pop_size_mixed_pop, 'prag', selected_parent_indices_matrix_per_run_select_none)
+    print ''
+    print ''
+    print ''
+    print ''
+    print "pragmatic_parents_selected_count_matrix_select_none is:"
+    print pragmatic_parents_selected_count_matrix_select_none
+    print "pragmatic_parents_selected_count_matrix_select_none.shape is:"
+    print pragmatic_parents_selected_count_matrix_select_none.shape
+
+
+
+    print ''
+    print ''
+    print "selected_hyps_per_generation_matrix_per_run_select_none.shape is:"
+    print selected_hyps_per_generation_matrix_per_run_select_none.shape
+
+    selected_hyps_new_lex_order_all_runs_select_none = get_selected_hyps_ordered(selected_hyps_per_generation_matrix_per_run_select_none, argsort_informativity_per_lexicon)
+    print ''
+    print ''
+    # print "selected_hyps_new_lex_order_all_runs_select_none is:"
+    # print selected_hyps_new_lex_order_all_runs_select_none
+    print "selected_hyps_new_lex_order_all_runs_select_none.shape is:"
+    print selected_hyps_new_lex_order_all_runs_select_none.shape
+
+    avg_inf_over_gens_matrix_select_none = avg_informativity_over_gens(n_runs, 1, n_iterations_mixed_pop, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs_select_none)
+    # print "avg_inf_over_gens_matrix_select_none is:"
+    # print avg_inf_over_gens_matrix_select_none
+    print "avg_inf_over_gens_matrix_select_none.shape is:"
+    print avg_inf_over_gens_matrix_select_none.shape
+
+
+    mean_inf_over_gens_select_none, conf_intervals_inf_over_gens_select_none = calc_mean_and_conf_invs_over_gens(avg_inf_over_gens_matrix_select_none)
+    print ''
+    print ''
+    # print "mean_inf_over_gens_select_none is:"
+    # print mean_inf_over_gens_select_none
+    print "mean_inf_over_gens_select_none.shape is:"
+    print mean_inf_over_gens_select_none.shape
+    print ''
+    # print "conf_intervals_inf_over_gens_select_none is:"
+    # print conf_intervals_inf_over_gens_select_none
+    print "conf_intervals_inf_over_gens_select_none.shape is:"
+    print conf_intervals_inf_over_gens_select_none.shape
+
+
+    percentiles_inf_over_gens_select_none = calc_percentiles_over_gens(avg_inf_over_gens_matrix_select_none)
+    print ''
+    print ''
+    # print "percentiles_inf_over_gens_select_none is:"
+    # print percentiles_inf_over_gens_select_none
+    print "percentiles_inf_over_gens_select_none.shape is:"
+    print percentiles_inf_over_gens_select_none.shape
+
+
+
+
+    avg_pragmatic_advantage_over_gens_matrix_select_none = avg_pragmatic_advantage_over_gens(n_runs, 1, n_iterations_mixed_pop, pragmatic_advantage_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs_select_none)
+    # print "avg_pragmatic_advantage_over_gens_matrix_select_none is:"
+    # print avg_pragmatic_advantage_over_gens_matrix_select_none
+    print "avg_pragmatic_advantage_over_gens_matrix_select_none.shape is:"
+    print avg_pragmatic_advantage_over_gens_matrix_select_none.shape
+
+
+    mean_pragmatic_advantage_over_gens_select_none, conf_intervals_pragmatic_advantage_over_gens_select_none = calc_mean_and_conf_invs_over_gens(avg_pragmatic_advantage_over_gens_matrix_select_none)
+    print ''
+    print ''
+    # print "mean_pragmatic_advantage_over_gens_select_none is:"
+    # print mean_pragmatic_advantage_over_gens_select_none
+    print "mean_pragmatic_advantage_over_gens_select_none.shape is:"
+    print mean_pragmatic_advantage_over_gens_select_none.shape
+    print ''
+    # print "conf_intervals_pragmatic_advantage_over_gens_select_none is:"
+    # print conf_intervals_pragmatic_advantage_over_gens_select_none
+    print "conf_intervals_pragmatic_advantage_over_gens_select_none.shape is:"
+    print conf_intervals_pragmatic_advantage_over_gens_select_none.shape
+
+
+    percentiles_pragmatic_advantage_over_gens_select_none = calc_percentiles_over_gens(avg_pragmatic_advantage_over_gens_matrix_select_none)
+    print ''
+    print ''
+    # print "percentiles_pragmatic_advantage_over_gens_select_none is:"
+    # print percentiles_pragmatic_advantage_over_gens_select_none
+    print "percentiles_pragmatic_advantage_over_gens_select_none.shape is:"
+    print percentiles_pragmatic_advantage_over_gens_select_none.shape
+
+
+
+
+    if context_generation == 'random':
+        if selection_type == 'none' or selection_type == 'l_learning':
+            plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
+        elif selection_type == 'p_taking':
+            plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
+        elif selection_type == 'ca_with_parent':
+            plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_init_'+communication_type_initial_pop+'_'+ca_measure_type_initial_pop+'_mutnts_'+communication_type_mutants+'_'+ca_measure_type_mutants+'_'+str(n_iterations_mixed_pop)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
+
+    elif context_generation == 'only_helpful' or context_generation == 'optimal':
+        if selection_type == 'none' or selection_type == 'l_learning':
+            plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
+        elif selection_type == 'p_taking':
+            plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_'+str(n_iterations_mixed_pop)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
+        elif selection_type == 'ca_with_parent':
+            plot_filename = 'evo_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size_mixed_pop)+'_select_'+selection_type+'_init_'+communication_type_initial_pop+'_'+ca_measure_type_initial_pop+'_mutnts_'+communication_type_mutants+'_'+ca_measure_type_mutants+'_'+str(n_iterations_mixed_pop)+'_I_'+str(n_contexts)+'_C_init_pop_'+pragmatic_level_initial_pop+'_a_'+str(optimality_alpha_initial_pop)[0]+'_mutnts_'+pragmatic_level_mutants+'_a_'+str(optimality_alpha_mutants)[0]+'_s_hyp_'+pragmatic_level_parent_hyp+'_xtra_err_'+str(extra_error)[0:3]+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+str(n_runs)+'_R_dcpl_'+str(decoupling)
+
+
+
+    plot_title = 'No selection'
+
+
+    plot_title = 'Prop. prag. agents / gens w/ select '+selection_type
+
+    plot_proportion_over_gens(plot_directory+'Plot_prop_prag_agents_'+plot_filename+'_'+line_style, plot_title, np.arange(1, len(proportion_pragmatic_agents_over_gens_per_run_select_none[0])+1), 'generations', 'proportion pragmatic agents', proportion_pragmatic_agents_over_gens_per_run_select_none, proportion_pragmatic_agents_over_gens_per_run_select_none, line_style, legend, legend_loc='center right', y_lim=[-0.05, 1.05])
+
+
+    plot_title = 'Avg. informativeness / gens w/ select '+selection_type
+
+    plot_proportion_over_gens(plot_directory+'Plot_avg_info_'+plot_filename+'_'+line_style, plot_title, np.arange(2, len(avg_fitness_per_gen_per_run_select_none[0][1:])+2), 'generations', 'average informativeness', proportion_pragmatic_agents_over_gens_per_run_select_none[:,1:], avg_inf_over_gens_matrix_select_none[:,1:], line_style, legend, legend_loc='lower right', y_lim=[0.0, max_inf+0.05])
+
+
+
+
+    plot_title = 'Avg. prag. benefit / gens w/ select '+selection_type
+
+    plot_proportion_over_gens(plot_directory+'Plot_avg_pragmatic_advantage_'+plot_filename+'_'+line_style, plot_title, np.arange(2, len(avg_pragmatic_advantage_over_gens_matrix_select_none[0][1:])+2), 'generations', 'average pragmatic benefit in ca', proportion_pragmatic_agents_over_gens_per_run_select_none[:,1:], avg_pragmatic_advantage_over_gens_matrix_select_none[:,1:], line_style, legend, legend_loc='upper right', y_lim=[0.0, 0.425]) #y_lim=[0.0, max_advantage+0.025])
+
+
 
     ###############################################################################
     selection_type = 'ca_with_parent'

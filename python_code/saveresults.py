@@ -2,7 +2,6 @@ __author__ = 'Marieke Woensdregt'
 
 
 import numpy as np
-import pickle
 
 
 
@@ -37,13 +36,4 @@ def convert_array_to_string(array):
     array_string = array_string.replace(" ", "_")
     array_string = array_string.replace(".", "")
     return array_string
-
-
-
-def write_results_to_pickle_file(pickle_file_title, results):
-    """
-    :param pickle_file_title: The title that the pickle file should get (string without file extension)
-    :return: Creates a reusable pickle file containing all the results
-    """
-    pickle.dump(results, open(pickle_file_title+'.p', 'wb'))
 

@@ -1,7 +1,6 @@
 __author__ = 'Marieke Woensdregt'
 
 
-from params_iteration import *
 import numpy as np
 from scipy import stats
 import pickle

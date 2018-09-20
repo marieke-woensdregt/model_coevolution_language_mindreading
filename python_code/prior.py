@@ -1,6 +1,7 @@
 __author__ = 'Marieke Woensdregt'
 
 import numpy as np
+from scipy.special import logsumexp
 import string
 
 
@@ -209,6 +210,7 @@ def list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspec
         composite_log_prior = log_perspective_prior_for_all_speakers+np.log(lexicon_prior[lex_hyp_index])
         log_prior_distribution[counter] = composite_log_prior
         counter += 1
+    log_prior_distribution = np.subtract(log_prior_distribution, logsumexp(log_prior_distribution))
     return log_prior_distribution
 
 

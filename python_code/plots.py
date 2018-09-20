@@ -86,7 +86,7 @@ def plot_timecourse_scores_percentiles(plot_title, plot_file_path, plot_file_tit
     ax.set_yticks(np.arange(0.05, 1.05, 0.05))
     ax.set_xticks(np.arange(0, n_data_points, x_axis_steps))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='best')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Med_Perc_'+plot_file_title+'.png')
@@ -121,7 +121,7 @@ def plot_timecourse_scores_percentiles_without_error_median(plot_title, plot_fil
     # ax.fill_between(np.arange(n_data_points), percentiles_lexicon_approximation[0], percentiles_lexicon_approximation[2], facecolor=color_lexicon_approximation, sal_alpha=0.3)
     plt.ylim((-0.05, 1.05))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Med_'+plot_file_title+'.png')
@@ -156,7 +156,7 @@ def plot_timecourse_scores_percentiles_without_error_mean(plot_title, plot_file_
     # ax.fill_between(np.arange(n_data_points), percentiles_lexicon_approximation[0], percentiles_lexicon_approximation[2], facecolor=color_lexicon_approximation, sal_alpha=0.3)
     plt.ylim((-0.05, 1.05))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Mean_'+plot_file_title+'.png')
@@ -195,7 +195,7 @@ def plot_timecourse_scores_percentiles_with_speaker_distinction(plot_title, plot
     # ax.fill_between(np.arange(n_data_points), percentiles_lexicon_approximation[0], percentiles_lexicon_approximation[2], facecolor=color_lexicon_approximation, sal_alpha=0.3)
     plt.ylim((-0.05, 1.05))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Med_Perc_'+plot_file_title+'.png')
@@ -230,7 +230,7 @@ def plot_timecourse_scores_percentiles_without_error_median_with_speaker_distinc
     # ax.plot(np.arange(n_data_points), percentiles_lexicon_approximation[1], label='Lexicon approx.', color=color_lexicon_approximation)
     plt.ylim((-0.05, 1.05))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Med_'+plot_file_title+'.png')
@@ -265,7 +265,7 @@ def plot_timecourse_scores_percentiles_without_error_mean_with_speaker_distincti
     # ax.plot(np.arange(n_data_points), percentiles_lexicon_approximation[3], label='Lexicon approx.', color=color_lexicon_approximation)
     plt.ylim((-0.05, 1.05))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Mean_'+plot_file_title+'.png')
@@ -304,7 +304,7 @@ def plot_timecourse_scores_percentiles_med_perc_one_hyp_type(plot_title, plot_fi
     ax.set_yticks(np.arange(0.05, 1.05, 0.05))
     ax.set_xticks(np.arange(0, n_data_points, x_axis_steps))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Comp_Only_'+plot_file_title+'_'+which_hyp_type+'.png')
@@ -341,7 +341,7 @@ def plot_timecourse_scores_percentiles_without_error_mean(plot_title, plot_file_
     ax.set_yticks(np.arange(0.05, 1.05, 0.05))
     ax.set_xticks(np.arange(0, n_data_points, x_axis_steps))
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Posterior probability")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Timecrse_Scores_Mean_Comp_Only_'+plot_file_title+'.png')
@@ -380,7 +380,7 @@ def plot_cum_belief_percentiles_with_speaker_distinction(plot_title, plot_file_p
     # ax.plot(np.arange(n_data_points), percentiles_lexicon_hyp_score[1], label='Lexicon hyp.', color=color_lexicon_hyp)
     # ax.fill_between(np.arange(n_data_points), percentiles_lexicon_hyp_score[0], percentiles_lexicon_hyp_score[2], facecolor=color_lexicon_hyp, sal_alpha=0.3)
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Cumulative belief in correct composite hypothesis")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Cum_Belief_Med_Perc_'+plot_file_title+'.png')
@@ -413,7 +413,7 @@ def plot_cum_belief_percentiles_without_error_median_with_speaker_distinction(pl
     #     ax.plot(np.arange(n_data_points), percentiles_perspective_score_per_speaker[speaker_index][1], label='Perspective hyp., speaker '+str(speaker_index), color=color_perspective_hyp, linestyle=linestyles[speaker_index])
     # ax.plot(np.arange(n_data_points), percentiles_lexicon_hyp_score[1], label='Lexicon hyp.', color=color_lexicon_hyp)
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Cumulative belief in correct composite hypothesis")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Cum_Belief_Med_'+plot_file_title+'.png')
@@ -446,7 +446,7 @@ def plot_cum_belief_percentiles_without_error_mean_with_speaker_distinction(plot
     #     ax.plot(np.arange(n_data_points), percentiles_perspective_score_per_speaker[speaker_index][3], label='Perspective hyp., speaker '+str(speaker_index), color=color_perspective_hyp, linestyle=linestyles[speaker_index])
     # ax.plot(np.arange(n_data_points), percentiles_lexicon_hyp_score[3], label='Lexicon hyp.', color=color_lexicon_hyp)
     ax.set_title(plot_title)
-    ax.set_xlabel("No. of contexts observed, with "+str(params.n_utterances)+" utterance per context")
+    ax.set_xlabel("No. observations")
     ax.set_ylabel("Cumulative belief in correct composite hypothesis")
     ax.legend(loc='center right')
     plt.savefig(plot_file_path+'/Cum_Belief_Mean_'+plot_file_title+'.png')
@@ -454,6 +454,128 @@ def plot_cum_belief_percentiles_without_error_mean_with_speaker_distinction(plot
 
 
 
+
+
+def boxplot_input_order(plot_file_title, percentiles_three_conditions_dict):
+    # sns.set_style("whitegrid", {"xtick.major.size":8, "ytick.major.size":8})
+    sns.set_style("whitegrid")
+    sns.set_palette("deep")
+    # sns.set_context("poster", font_scale=1.6)
+
+    fig, axes = plt.subplots(ncols=3, sharey=True)
+    # fig.subplots_adjust(wspace=0)
+
+    blue = sns.color_palette()[0]
+    green = sns.color_palette()[2]
+
+    counter = 0
+    for ax, name in zip(axes, ['Random', 'Same First', 'Opposite First']):
+        bp = ax.boxplot([percentiles_three_conditions_dict[name][item] for item in ['same perspective', 'opposite perspective']], widths = 0.5, patch_artist=True)
+        ## change outline color, fill color and linewidth of the boxes
+        for i in range(len(bp['boxes'])):
+            if i == 0 or i == 2 or i == 4:
+                # change outline color
+                bp['boxes'][i].set(color=green, alpha=0.3, linewidth=2)
+                # change fill color
+                bp['boxes'][i].set(facecolor=green, alpha=0.3)
+                ## change color and linewidth of the medians
+                bp['medians'][i].set(color=green, linewidth=2)
+                # ## change the style of fliers and their fill
+                # bp['fliers'][i].set(marker='o', color=odd_boxes_colour, sal_alpha=0.5)
+            elif i==1 or i==3 or i==5:
+                # change outline color
+                bp['boxes'][i].set(color=blue, alpha=0.3, linewidth=2)
+                # change fill color
+                bp['boxes'][i].set(facecolor=blue, alpha=0.3)
+                ## change color and linewidth of the medians))
+                bp['medians'][i].set(color=blue, linewidth=2)
+                # ## change the style of fliers and their fill
+                # bp['fliers'][i].set(marker='o', color=even_boxes_colour, sal_alpha=0.5)
+        for j in range(len(bp['whiskers'])):
+            if j == 0 or j == 1 or j == 4 or j == 5 or j == 8 or j == 9:
+                ## change color and linewidth of the whiskers
+                bp['whiskers'][j].set(color=green, linewidth=2)
+                ## change color and linewidth of the caps
+                bp['caps'][j].set(color=green, linewidth=2)
+            elif j == 2 or j == 3 or j == 6 or j == 7 or j == 10 or j == 11:
+                ## change color and linewidth of the whiskers
+                bp['whiskers'][j].set(color=blue, linewidth=2)
+                ## change color and linewidth of the caps
+                bp['caps'][j].set(color=blue, linewidth=2)
+        # Remove the tick-marks from top and right spines
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
+        # Set xlabels:
+        ax.set(xticklabels=['same p.', 'opposite p.'], xlabel=name)
+        ax.xaxis.label.set_size(14)
+        ax.tick_params(labelsize=11)
+        # ax.margins(0.1) # Optional
+        if counter == 0:
+            # ax.set_title('Learning different perspectives with different orders of input', x=1.5, y=1.05)
+            ax.set_ylabel('No. observations required to learn perspective')
+            ax.yaxis.label.set_size(14)
+        counter += 1
+    # fig.subplots_adjust(wspace=0.05)
+    # plt.gcf().subplots_adjust(bottom=0.15)
+    # Save the figure
+    plt.suptitle('Learning different perspectives with different orders of input', fontsize=16)
+    plt.savefig(plot_file_title)
+    plt.show()
+
+
+
+
+
+
+
+def boxplot_input_order_opposite_only(plot_file_title, percentiles_three_conditions_dict):
+    # sns.set_style("whitegrid", {"xtick.major.size":8, "ytick.major.size":8})
+    sns.set_style("whitegrid")
+    sns.set_palette("deep")
+    # sns.set_context("poster", font_scale=1.6)
+
+    fig, axes = plt.subplots(ncols=3, sharey=True)
+    # fig.subplots_adjust(wspace=0)
+
+    blue = sns.color_palette()[0]
+
+    counter = 0
+    for ax, name in zip(axes, ['Randomly Interleaved', 'Same First', 'Opposite First']):
+        bp = ax.boxplot([percentiles_three_conditions_dict[name][item] for item in ['opposite perspective']], widths = 0.5, patch_artist=True)
+        ## change outline color, fill color and linewidth of the boxes
+        for i in range(len(bp['boxes'])):
+            # change outline color
+            bp['boxes'][i].set(color=blue, alpha=0.3, linewidth=2)
+            # change fill color
+            bp['boxes'][i].set(facecolor=blue, alpha=0.3)
+            ## change color and linewidth of the medians))
+            bp['medians'][i].set(color=blue, linewidth=2)
+            # ## change the style of fliers and their fill
+            # bp['fliers'][i].set(marker='o', color=even_boxes_colour, sal_alpha=0.5)
+        for j in range(len(bp['whiskers'])):
+            ## change color and linewidth of the whiskers
+            bp['whiskers'][j].set(color=blue, linewidth=2)
+            ## change color and linewidth of the caps
+            bp['caps'][j].set(color=blue, linewidth=2)
+        # Remove the tick-marks from top and right spines
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
+        # Set xlabels:
+        ax.set(xticklabels=['opposite perspective'], xlabel=name)
+        ax.xaxis.label.set_size(14)
+        ax.tick_params(labelsize=11)
+        # ax.margins(0.1) # Optional
+        if counter == 0:
+            # ax.set_title('Learning opposite perspective with different orders of input', x=1.5, y=1.05)
+            ax.set_ylabel('No. observations required to learn perspective')
+            ax.yaxis.label.set_size(14)
+        counter += 1
+    # fig.subplots_adjust(wspace=0.05)
+    # plt.gcf().subplots_adjust(bottom=0.15)
+    # Save the figure
+    plt.suptitle('Learning opposite perspective with different orders of input', fontsize=16)
+    plt.savefig(plot_file_title)
+    plt.show()
 
 
 
@@ -616,6 +738,94 @@ def plot_timecourse_scores_percentiles_for_different_learners_without_error_mean
     plt.savefig(plot_file_path+'/Diff_Learners_Mean_'+plot_file_title+'.png')
     plt.show()
 
+
+
+
+def plot_timecourse_learning_diff_lex_types(plot_file_path, plot_file_title, plot_title, ylabel, inf_level_per_lex_type_sorted, posterior_mass_correct_matrix_sorted, high_cut_off, x_axis_start, x_axis_step, lex_measure, baseline=None, maximum=None, baseline_label=None, maximum_label=None,legend=None):
+    sns.set_style("whitegrid")
+    # palette = itertools.cycle(sns.cubehelix_palette(n_colors=len(inf_level_per_lex_type_sorted), reverse=True))
+    # palette = itertools.cycle(sns.color_palette("RdYlGn", len(inf_level_per_lex_type_sorted)))
+    palette = sns.color_palette("Spectral", len(inf_level_per_lex_type_sorted))
+    palette.reverse()
+    palette = itertools.cycle(palette)
+    ## Flip the arrays for plotting and labelling so that legend shows with lowest ca at bottom and highest ca at top:
+    inf_level_per_lex_type_sorted = inf_level_per_lex_type_sorted[::-1]
+    posterior_mass_correct_matrix_sorted = posterior_mass_correct_matrix_sorted[::-1]
+    with sns.axes_style("whitegrid"):
+        if legend == True:
+            fig, ax = plt.subplots(figsize=(10.5, 6))
+        else:
+            fig, ax = plt.subplots(figsize=(8, 6))
+        if maximum:
+            ax.axhline(maximum, color='0.2', linestyle='--', linewidth=2, label=maximum_label)
+        for l in range(len(inf_level_per_lex_type_sorted)):
+            inf_value = inf_level_per_lex_type_sorted[l]
+            # if l < inf_legend_cutoff or l > (len(mean_composite_hyp_posterior_mass_correct_per_lex_type) - inf_legend_cutoff)-1:
+            #     ax.plot(mean_composite_hyp_posterior_mass_correct_per_lex_type[l], label='ca = '+str(inf_value), color=next(palette))
+            # elif l == inf_legend_cutoff:
+            #     ax.plot(mean_composite_hyp_posterior_mass_correct_per_lex_type[l], label='etc.', color=next(palette))
+            # else:
+            #     ax.plot(mean_composite_hyp_posterior_mass_correct_per_lex_type[l], color=next(palette))
+            # ax.plot(posterior_mass_correct_matrix_sorted[l][:high_cut_off+1], label='L-type '+lex_measure+' = '+str(abs(inf_value)), color=next(palette))
+            ax.plot(posterior_mass_correct_matrix_sorted[l], label='L-type '+lex_measure+' = '+str(abs(inf_value)), color=next(palette))
+        if baseline:
+            ax.axhline(baseline, color='0.6', linestyle='--', linewidth=2, label=baseline_label)
+        ax.set_xlim(0, high_cut_off)
+        ax.set_ylim(-0.05, 1.05)
+        ax.set_xticks(np.arange(x_axis_start, (high_cut_off+1), x_axis_step))
+        ax.set_yticks(np.arange(0.0, 1.05, 0.1))
+        ax.tick_params(labelright=True, labelsize=14)
+        if legend == True:
+            # Shrink current axis by 28%
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0, box.width * 0.77, box.height])
+            # Put a legend to the right of the current axis
+            legend = ax.legend(loc='center left', bbox_to_anchor=(1.07, 0.5), frameon=True, fontsize=14)
+            legend.get_frame().set_linewidth(1.5)
+    plt.xlabel('No. of observations (context + utterance)', fontsize=16)
+    plt.ylabel(ylabel, fontsize=16)
+    plt.suptitle(plot_title, fontsize=18)
+    plt.savefig(plot_file_path+'Plot_Tmcrse_Learning_Diff_Lex_Types_'+plot_file_title+'.pdf')
+    plt.show()
+
+
+
+
+def plot_timecourse_learning_diff_lex_types_avg_two_measures(plot_file_path, plot_file_title, plot_title, ylabel, posterior_mass_correct_matrix_sorted_msr_1, posterior_mass_correct_matrix_sorted_msr_2, high_cut_off, x_axis_start, x_axis_step, text_size, baseline, maximum):
+    sns.set_style("whitegrid")
+    sns.set(font_scale=text_size)
+    first_quartile_msr_1 = np.percentile(posterior_mass_correct_matrix_sorted_msr_1, 25, axis=0)
+    median_msr_1 = np.percentile(posterior_mass_correct_matrix_sorted_msr_1, 50, axis=0)
+    third_quartile_msr_1 = np.percentile(posterior_mass_correct_matrix_sorted_msr_1, 75, axis=0)
+    first_quartile_msr_2 = np.percentile(posterior_mass_correct_matrix_sorted_msr_2, 25, axis=0)
+    median_msr_2 = np.percentile(posterior_mass_correct_matrix_sorted_msr_2, 50, axis=0)
+    third_quartile_msr_2 = np.percentile(posterior_mass_correct_matrix_sorted_msr_2, 75, axis=0)
+    color_post_prob = sns.color_palette()[1]
+    color_inf = sns.color_palette()[3]
+    with sns.axes_style("whitegrid"):
+        fig, ax = plt.subplots()
+        ax.axhline(baseline, color='0.6', linestyle='--')
+        ax.axhline(maximum, color='0.2')
+        ax.plot(np.arange(high_cut_off), median_msr_1[0:high_cut_off], color=color_post_prob, label='post. prob. on correct hyp.')
+        ax.fill_between(np.arange(high_cut_off), first_quartile_msr_1[0:high_cut_off], third_quartile_msr_1[0:high_cut_off], color=color_post_prob, alpha=0.5)
+        ax.plot(np.arange(high_cut_off), median_msr_2[0:high_cut_off], color=color_inf, label='inferred informativeness')
+        ax.fill_between(np.arange(high_cut_off), first_quartile_msr_2[0:high_cut_off], third_quartile_msr_2[0:high_cut_off], color=color_inf, alpha=0.5)
+        ax.set_xlim(0, high_cut_off)
+        ax.set_ylim(-0.05, 1.05)
+        ax.set_xticks(np.arange(x_axis_start, (high_cut_off+1), x_axis_steps))
+        ax.set_yticks(np.arange(0.0, 1.05, 0.1))
+        ax.tick_params(labelright=True)
+        # Shrink current axis by 28%
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.84, box.height])
+        # Put a legend to the right of the current axis
+        legend = ax.legend(loc='center left', bbox_to_anchor=(1.07, 0.5), frameon=True, fontsize=12)
+        legend.get_frame().set_linewidth(1.5)
+    plt.xlabel('No. of observations')
+    plt.ylabel(ylabel)
+    plt.title(plot_title)
+    plt.savefig(plot_file_path+'Plot_Tmcrse_Learning_Diff_Lex_Types_Average_'+plot_file_title+'.pdf')
+    plt.show()
 
 
 

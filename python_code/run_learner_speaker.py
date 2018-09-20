@@ -2,6 +2,7 @@ __author__ = 'Marieke Woensdregt'
 
 
 import numpy as np
+import pickle
 import time
 
 import context
@@ -152,7 +153,8 @@ lexicon_prior_constant_string = saveresults.convert_array_to_string(lexicon_prio
 # 1.7: The parameters that determine the amount of data_dict that the learner gets to see, and the amount of runs of the simulation:
 
 n_utterances = 1  # This parameter determines how many signals the learner gets to observe in each context
-n_contexts = 120  # The number of contexts that the learner gets to see. If context_generation = 'optimal' n_contexts for n_meanings = 2 can be anything in the table of 4 (e.g. 20, 40, 60, 80, 100, etc.); for n_meanings = 3 anything in the table of 12 (e.g. 12, 36, 60, 84, 108, etc.); and for n_meanings = 4 anything in the table of 48 (e.g. 48, 96, 144, etc.).
+n_contexts = 60  # The number of contexts that the learner gets to see. If context_generation = 'optimal' n_contexts for n_meanings = 2 can be anything in the table of 4 (e.g. 20, 40, 60, 80, 100, etc.); for n_meanings = 3 anything in the table of 12 (e.g. 12, 36, 60, 84, 108, etc.); and for n_meanings = 4 anything in the table of 48 (e.g. 48, 96, 144, etc.).
+
 
 
 # 1.8: The parameters that determine how learning is measured:
@@ -337,10 +339,31 @@ def multi_runs_dyadic(n_meanings, n_signals, n_runs, n_contexts, n_utterances, c
         multi_run_utterances_matrix[r] = data.utterances
         multi_run_log_posterior_matrix[r] = log_posteriors_per_data_point_matrix
 
+
+    print ''
+    print ''
+    print ''
+    print ''
+    print "multi_run_log_posterior_matrix.shape is:"
+    print multi_run_log_posterior_matrix.shape
+    final_log_posteriors_per_run = multi_run_log_posterior_matrix[:, -1]
+    print ''
+    print ''
+    print "final_log_posteriors_per_run.shape is:"
+    print final_log_posteriors_per_run.shape
+
+
     run_time_mins = (time.clock()-t0)/60.
 
-    results_dict = {'multi_run_context_matrix':multi_run_context_matrix, 'multi_run_utterances_matrix':multi_run_utterances_matrix, 'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix, 'correct_p_hyp_indices':correct_p_hyp_indices, 'correct_lex_hyp_indices':correct_lex_hyp_indices, 'correct_composite_hyp_indices':correct_composite_hyp_indices, 'speaker_lexicon':speaker.lexicon.lexicon,
-    'run_time_mins':run_time_mins}
+    results_dict = {'multi_run_context_matrix':multi_run_context_matrix,
+                    'multi_run_utterances_matrix':multi_run_utterances_matrix,
+                    'multi_run_log_posterior_matrix':multi_run_log_posterior_matrix,
+                    'final_log_posteriors_per_run':final_log_posteriors_per_run,
+                    'correct_p_hyp_indices':correct_p_hyp_indices,
+                    'correct_lex_hyp_indices':correct_lex_hyp_indices,
+                    'correct_composite_hyp_indices':correct_composite_hyp_indices,
+                    'speaker_lexicon':speaker.lexicon.lexicon,
+                    'run_time_mins':run_time_mins}
     return results_dict
 
 
@@ -734,50 +757,51 @@ if __name__ == "__main__":
 
     pickle_file_title_all_results = pickle_file_directory + run_type_dir + 'Results_' + file_title
 
-    saveresults.write_results_to_pickle_file(pickle_file_title_all_results, all_results_dict)
+
+    pickle.dump(all_results_dict, open(pickle_file_title_all_results+'.p', 'wb'))
 
 
     #
     # pickle_file_title_mean_std_final_posteriors = output_pickle_file_directory+run_type_dir+'Mean_Std_Final_Post_'+file_title
     #
-    # saveresults.write_results_to_pickle_file(pickle_file_title_mean_std_final_posteriors, mean_std_final_posteriors_dict)
+    # pickle.dump(mean_std_final_posteriors_dict, open(pickle_file_title_mean_std_final_posteriors + '.p', 'wb'))
     #
     #
 
     # pickle_file_title_lex_posterior_matrix = output_pickle_file_directory+ run_type_dir + 'Lex_Post_Matrix' + file_title
     #
-    # saveresults.write_results_to_pickle_file(pickle_file_title_lex_posterior_matrix, lex_posterior_matrix)
+    # pickle.dump(lex_posterior_matrix, open(pickle_file_title_lex_posterior_matrix + '.p', 'wb'))
     #
 
 
     pickle_file_title_correct_hyp_posterior_mass_percentiles = pickle_file_directory + run_type_dir + 'Correct_Hyp_Post_Mass_Percentiles_' + file_title
 
-    saveresults.write_results_to_pickle_file(pickle_file_title_correct_hyp_posterior_mass_percentiles, percentiles_correct_hyp_posterior_mass_dict)
+    pickle.dump(percentiles_correct_hyp_posterior_mass_dict, open(pickle_file_title_correct_hyp_posterior_mass_percentiles+'.p', 'wb'))
 
 
 
     pickle_file_title_correct_hyp_posterior_mass_mean = pickle_file_directory + run_type_dir + 'Correct_Hyp_Post_Mass_Mean_' + file_title
 
-    saveresults.write_results_to_pickle_file(pickle_file_title_correct_hyp_posterior_mass_mean, mean_correct_hyp_posterior_mass_dict)
-
+    pickle.dump(mean_correct_hyp_posterior_mass_dict, open(pickle_file_title_correct_hyp_posterior_mass_mean+'.p', 'wb'))
 
 
     # pickle_file_title_hypothesis_percentiles = output_pickle_file_directory+ run_type_dir + 'Hyp_Percentiles' + file_title
     #
-    # saveresults.write_results_to_pickle_file(pickle_file_title_hypothesis_percentiles, hypotheses_percentiles)
-    #
+    # pickle.dump(hypotheses_percentiles, open(pickle_file_title_hypothesis_percentiles + '.p', 'wb'))
+
+
 
     #
     # pickle_file_title_convergence_time_min_max = output_pickle_file_directory+run_type_dir+'Convergence_Time_Percentiles'+file_title
     #
-    # saveresults.write_results_to_pickle_file(pickle_file_title_convergence_time_min_max, convergence_time_dict)
+    # pickle.dump(convergence_time_dict, open(pickle_file_title_convergence_time_min_max + '.p', 'wb'))
     #
-    #
+
+
     #
     # pickle_file_title_convergence_time_percentiles = output_pickle_file_directory+run_type_dir+'Convergence_Time_Percentiles'+file_title
     #
-    # saveresults.write_results_to_pickle_file(pickle_file_title_convergence_time_percentiles, percentiles_converge_time_over_theta_dict)
-    #
+    # pickle.dump(percentiles_converge_time_over_theta_dict, open(pickle_file_title_convergence_time_percentiles + '.p', 'wb'))
 
 
 

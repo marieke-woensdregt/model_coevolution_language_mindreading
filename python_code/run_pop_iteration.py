@@ -140,7 +140,7 @@ lexicon_probs = np.array([0. for x in range(len(lexicon_hyps)-1)]+[1.])
 
 
 perspectives = np.array([0., 1.]) # The different perspectives that agents can have
-perspective_probs = np.array([1., 0.]) # The ratios with which the different perspectives will be present in the population
+perspective_probs = np.array([0., 1.]) # The ratios with which the different perspectives will be present in the population
 perspective_probs_string = saveresults.convert_array_to_string(perspective_probs) # Turns the perspective probs into a string in order to add it to file names
 
 
@@ -206,10 +206,10 @@ cut_off_point = 5
 n_runs = 2  # The number of runs of the simulation
 report_every_r = 1
 
+
 recording = 'minimal'  # This can be set to either 'everything' or 'minimal'
 
 which_hyps_on_graph = 'all_hyps'  # This is used in the plot_post_probs_over_lex_hyps() function, and can be set to either 'all_hyps' or 'lex_hyps_only'
-
 
 lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or 'ca' for communicative accuracy (of the lexicon with itself)
 

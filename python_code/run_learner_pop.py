@@ -2,6 +2,7 @@ __author__ = 'Marieke Woensdregt'
 
 
 import numpy as np
+import pickle
 import time
 
 import context
@@ -39,7 +40,7 @@ n_signals = 3  # The number of signals
 
 # 1.2: The parameters defining the contexts and how they map to the agent's saliencies:
 
-context_generation = 'optimal' # This can be set to either 'random', 'only_helpful', 'optimal'
+context_generation = 'random'  # This can be set to either 'random', 'only_helpful', 'optimal'
 #helpful_contexts = np.array([[0.1, 0.7], [0.3, 0.9], [0.1, 0.6], [0.4, 0.9], [0.1, 0.8], [0.2, 0.9], [0.1, 0.5], [0.5, 0.9], [0.1, 0.4], [0.6, 0.9], [0.7, 0.1], [0.9, 0.3], [0.6, 0.1], [0.9, 0.4], [0.8, 0.1], [0.9, 0.2], [0.5, 0.1], [0.9, 0.5], [0.4, 0.1], [0.9, 0.6]])  # This is a fixed collection of the 20 most helpful contexts (in which the ratio of meaning probability for the one perspective is maximally different from that for the other perspective).
 if n_meanings == 2:
     helpful_contexts = np.array([[0.1, 0.7], [0.3, 0.9],
@@ -84,7 +85,7 @@ sal_alpha = 1.  # The exponent that is used by the saliency function. sal_alpha=
 
 error = 0.05  # The error term on production
 error_string = saveresults.convert_array_to_string(error)
-extra_error = True # Determines whether the error specified above gets added on top AFTER the pragmatic speaker has calculated its production probabilities by maximising the utility to the listener.
+extra_error = True  # Determines whether the error specified above gets added on top AFTER the pragmatic speaker has calculated its production probabilities by maximising the utility to the listener.
 
 
 # 1.3: The parameters that determine the make-up of the population:
@@ -92,14 +93,20 @@ extra_error = True # Determines whether the error specified above gets added on 
 pop_size = 2
 
 
-pragmatic_level = 'prag'  # This can be set to either 'literal', 'perspective-taking' or 'prag'
-optimality_alpha = 3.0  # Goodman & Stuhlmuller (2013) fitted optimality_alpha = 3.4 to participant data with 4x3 lexicon of three number words ('one', 'two', and 'three') that could be mapped to four different world states (0, 1, 2, and 3)
+pragmatic_level = 'literal'  # This can be set to either 'literal', 'perspective-taking' or 'prag'
+optimality_alpha = 1.0  # Goodman & Stuhlmuller (2013) fitted optimality_alpha = 3.4 to participant data with 4x3 lexicon of three number words ('one', 'two', and 'three') that could be mapped to four different world states (0, 1, 2, and 3)
 
 
-perspectives = np.array([0., 1.]) # The different perspectives that agents can have
-perspective_probs = np.array([0., 1.]) # The proportions with which the different perspectives will be present in the population
+perspectives = np.array([0., 1.])  # The different perspectives that agents can have
+perspective_probs = np.array([.5, .5])  # The proportions with which the different perspectives will be present in the population
 perspective_probs_string = saveresults.convert_array_to_string(perspective_probs) # Turns the perspective probs into a string in order to add it to file names
 
+
+fixed_perspectives = np.array([0., 1.])  # Used to override the perspectives of the population which are otherwise chosen stochastically based on the parameters perspectives and perspective_probs above. This array has to have length equal to pop_size
+print ''
+print ''
+print "fixed_perspectives are:"
+print fixed_perspectives
 
 learning_types = ['map', 'sample'] # The types of learning that the learners can do
 learning_type_probs = np.array([0., 1.]) # The ratios with which the different learning types will be present in the population
@@ -134,10 +141,12 @@ elif which_lexicon_hyps == 'only_optimal':
 # 1.6: More parameters that determine the make-up of the population:
 
 lexicon_probs = np.array([0. for x in range(len(lexicon_hyps)-1)]+[1.])
-# print "lexicon_probs are:"
-# print lexicon_probs
-print "lexicon_probs.shape are:"
-print lexicon_probs.shape
+
+fixed_lexicons = np.array([[[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]] for x in range(pop_size)])  # Used to override the lexicons of the population which are otherwise chosen stochastically based on the parameters lexicon_hyps and lexicon_probs above. This array has to have length equal to pop_size
+print ''
+print ''
+print "fixed_lexicons are:"
+print fixed_lexicons
 
 
 # 1.7: The parameters that determine the learner's prior:
@@ -149,8 +158,8 @@ perspective_prior_strength = 0.9 # The strength of the egocentric prior (only us
 perspective_prior_strength_string = saveresults.convert_array_to_string(perspective_prior_strength)
 
 
-lexicon_prior_type = 'compressibility_bias' # This can be set to either 'neutral', 'ambiguous_fixed', 'half_ambiguous_fixed', 'expressivity_bias' or 'compressibility_bias'
-lexicon_prior_constant = 0.0003 # Determines the strength of the lexicon bias, with small c creating a STRONG prior and large c creating a WEAK prior. (And with c = 1000 creating an almost uniform prior.)
+lexicon_prior_type = 'neutral' # This can be set to either 'neutral', 'ambiguous_fixed', 'half_ambiguous_fixed', 'expressivity_bias' or 'compressibility_bias'
+lexicon_prior_constant = 0.0 # Determines the strength of the lexicon bias, with small c creating a STRONG prior and large c creating a WEAK prior. (And with c = 1000 creating an almost uniform prior.)
 lexicon_prior_constant_string = saveresults.convert_array_to_string(lexicon_prior_constant)
 
 
@@ -158,10 +167,17 @@ lexicon_prior_constant_string = saveresults.convert_array_to_string(lexicon_prio
 # 1.8: The parameters that determine the amount of data_dict that the learner gets to see, and the amount of runs of the simulation:
 
 n_utterances = 1  # This parameter determines how many signals the learner gets to observe in each context
-n_contexts = 12  # The number of contexts that the learner gets to see. If context_generation = 'most_optimal' n_contexts for n_meanings = 2 can be anything in the table of 4 (e.g. 20, 40, 60, 80, 100, etc.); for n_meanings = 3 anything in the table of 12 (e.g. 12, 36, 60, 84, 108, etc.); and for n_meanings = 4 anything in the table of 48 (e.g. 48, 96, 144, etc.).
+n_contexts = 800  # The number of contexts that the learner gets to see. If context_generation = 'most_optimal' n_contexts for n_meanings = 2 can be anything in the table of 4 (e.g. 20, 40, 60, 80, 100, etc.); for n_meanings = 3 anything in the table of 12 (e.g. 12, 36, 60, 84, 108, etc.); and for n_meanings = 4 anything in the table of 48 (e.g. 48, 96, 144, etc.).
 
-speaker_order_type = 'random' # This can be set to either 'random', 'random_equal' (for random order with making sure that each speaker gets an equal amount of utterances) 'same_first' (first portion of input comes from same perspective, second portion of input from opposite perspective), 'same_first_equal' (where both speakers get to produce the exact same amount of utterances), 'opp_first' (vice versa) or 'opp_first_equal'
+
+speaker_order_type = 'opp_first_equal' # This can be set to either 'random', 'random_equal' (for random order with making sure that each speaker gets an equal amount of utterances) 'same_first' (first portion of input comes from same perspective, second portion of input from opposite perspective), 'same_first_equal' (where both speakers get to produce the exact same amount of utterances), 'opp_first' (vice versa) or 'opp_first_equal'
 first_input_stage_ratio = 0.5 # This is the proportion of contexts that will make up the first input stage (see parameter 'speaker_order_type' above)
+
+
+print ''
+print ''
+print "speaker_order_type is:"
+print speaker_order_type
 
 
 # 1.9: The parameters that determine how learning is measured:
@@ -179,7 +195,7 @@ theta_step_string = theta_step_string.replace(".", "")
 # 1.10: The parameters that determine the type and number of simulations that are run:
 
 #FIXME: In the current implementation 'half_ambiguous_lex' can have different instantiations. Therefore, if we run a simulation where there are different lexicon_type_probs, we will want the run_type to be 'population_same_pop' to make sure that all the 'half ambiguous' speakers do have the SAME half ambiguous lexicon.
-run_type = 'population_diff_pop' # This can be set to 'population_diff_pop' if there are no speakers with the 'half_ambiguous' lexicon type, 'population_same_pop' if there are, 'population_same_pop_dist_learner' if the learner can distinguish between different speakers
+run_type = 'population_same_pop_dist_learner' # This can be set to 'population_diff_pop' if there are no speakers with the 'half_ambiguous' lexicon type, 'population_same_pop' if there are, 'population_same_pop_dist_learner' if the learner can distinguish between different speakers
 
 if run_type == 'population_diff_pop' or run_type == 'population_same_pop':
     agent_type = 'no_p_distinction' # This can be set to either 'p_distinction' or 'no_p_distinction'. Determines whether the population is made up of DistinctionAgent objects or Agent objects (DistinctionAgents can learn different perspectives for different agents, Agents can only learn one perspective for all agents they learn from).
@@ -194,7 +210,7 @@ elif agent_type == 'p_distinction':
     hypothesis_space = hypspace.list_hypothesis_space_with_speaker_distinction(perspective_hyps, lexicon_hyps, pop_size) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
 
 
-n_runs = 2  # The number of runs of the simulation
+n_runs = 10  # The number of runs of the simulation
 report_every_r = 1
 
 which_hyps_on_graph = 'all_hyps' # This is used in the plot_post_probs_over_lex_hyps() function, and can be set to either 'all_hyps' or 'lex_hyps_only'
@@ -262,8 +278,6 @@ def multi_runs_population_diff_pop(n_meanings, n_signals, n_runs, n_contexts, n_
 
         population = pop.Population(pop_size, n_meanings, n_signals, hypothesis_space, perspective_hyps, lexicon_hyps, learner_perspective, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, perspectives, perspective_probs, sal_alpha, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, n_contexts, context_type, context_generation, context_size, helpful_contexts, n_utterances, learning_types, learning_type_probs)
 
-
-
         perspective_prior_fixed = perspective_probs
         lexicon_prior_fixed = np.zeros(len(lexicon_hyps))
         for i in range(len(lexicon_hyps)):
@@ -291,12 +305,17 @@ def multi_runs_population_diff_pop(n_meanings, n_signals, n_runs, n_contexts, n_
 
         learner = pop.Agent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, learner_perspective, sal_alpha, learner_lexicon, learner_learning_type)
 
+
         speaker_order = pop.create_speaker_order_single_generation(population, speaker_order_type, n_contexts, first_input_stage_ratio)
+
+
         if context_generation == 'random':
             data = population.produce_pop_data(context_matrix, n_utterances, speaker_order)
+            log_posteriors_per_data_point_matrix = learner.inference(n_contexts, n_utterances, data, error)
         elif context_generation == 'optimal':
             data = population.produce_pop_data_fixed_contexts(context_matrix, n_utterances, speaker_order, helpful_contexts, n_signals)
-        log_posteriors_per_data_point_matrix = learner.inference_on_signal_counts_data(data, error)
+            log_posteriors_per_data_point_matrix = learner.inference_on_signal_counts_data(data, error)
+
 
 
         # FIXME: If I want the half_ambiguous lexicon to be generated with the ambiguous mappings chosen at random, I have to make sure that the majority_lex_hyp_indices and majority_composite_hyp_index are logged for each run separately
@@ -421,7 +440,7 @@ def multi_runs_population_same_pop(n_meanings, n_signals, n_runs, n_contexts, n_
 
 
 #TODO: Describe what all the steps in this function are for
-def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, learner_perspective, pop_size, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_hyps, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant):
+def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, learner_perspective, pop_size, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_hyps, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, fixed_perspectives=None, fixed_lexicons=None):
     """
     :param n_meanings: integer specifying number of meanings ('objects') in the lexicon
     :param n_signals: integer specifying number of signals in the lexicon
@@ -460,6 +479,13 @@ def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_
     :return: A list containing all the result arrays ('result_array_list') and a dictionary containing the keys of those arrays with the corresponding indices ('result_array_keys')
     """
 
+    print ''
+    print ''
+    print ''
+    print ''
+    print 'This is the multi_runs_population_same_pop_distinction_learner() function:'
+
+
     ## 1) First the full composite hypothesis space is assembled in a matrix, containing each possible combination of lexicon hypothesis and perspective hypothesis for the different speakers:
     hypothesis_space = hypspace.list_hypothesis_space_with_speaker_distinction(perspective_hyps, lexicon_hyps, pop_size)
 
@@ -484,8 +510,8 @@ def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_
     ## 4.1) First the population's lexicons are determined:
     lexicons = []
     for i in range(len(lexicon_hyps)):
-        lex_type = lexicon_hyps[i]
-        lexicon = lex.Lexicon(lex_type, n_meanings, n_signals)
+        lex_hyp = lexicon_hyps[i]
+        lexicon = lex.Lexicon('specified_lexicon', n_meanings, n_signals, specified_lexicon=lex_hyp)
         lexicon = lexicon
         lexicons.append(lexicon)
 
@@ -502,6 +528,18 @@ def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_
     ## 4.4) Then the population itself is created:
     population = pop.DistinctionPopulation(pop_size, n_meanings, n_signals, hypothesis_space, perspective_hyps, lexicon_hyps, learner_perspective, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, composite_log_priors, perspectives, perspectives_per_agent, perspective_probs, sal_alpha, lexicons, lexicons_per_agent, error, n_contexts, context_type, context_generation, context_size, helpful_contexts, n_utterances, learning_types, learning_types_per_agent, learning_type_probs)
 
+
+    #TODO: I've added the optional input arguments 'fixed_perspectives' and 'fixed_lexicons' and the for-loop below to allow me to set the lexicons and perspectives of the input speakers (to use for the staging of input from different perspectives simulations):
+    if fixed_perspectives is not None:
+        for i in range(len(population.population)):
+            speaker = population.population[i]
+            speaker.perspective = fixed_perspectives[i]
+        population.perspectives_per_agent = fixed_perspectives
+
+    if fixed_lexicons is not None:
+        for i in range(len(population.population)):
+            speaker = population.population[i]
+            speaker.lexicon = lex.Lexicon('specified_lexicon', n_meanings, n_signals, specified_lexicon=fixed_lexicons[i])
 
     for r in range(n_runs):
         if r % report_every_r == 0:
@@ -545,7 +583,16 @@ def multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_
         learner = pop.DistinctionAgent(perspective_hyps, lexicon_hyps, composite_log_priors, composite_log_priors, learner_perspective, sal_alpha, learner_lexicon, learner_learning_type, pop_size)
 
         if r == 0:
-            print 
+
+            print ''
+            print ''
+            print ''
+            print ''
+            print 'population is:'
+            population.print_population()
+
+            print ''
+            print ''
             print 'learner is:'
             learner.print_agent()
 
@@ -580,7 +627,7 @@ if __name__ == "__main__":
             results_dict = multi_runs_population_same_pop(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, learner_perspective, pop_size, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_hyps, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant)
 
         elif run_type == 'population_same_pop_dist_learner':
-            results_dict = multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, learner_perspective, pop_size, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_hyps, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant)
+            results_dict = multi_runs_population_same_pop_distinction_learner(n_meanings, n_signals, n_runs, n_contexts, n_utterances, context_generation, context_type, context_size, helpful_contexts, learner_perspective, pop_size, speaker_order_type, first_input_stage_ratio, agent_type, perspectives, perspective_probs, sal_alpha, lexicon_hyps, lexicon_probs, error, extra_error, pragmatic_level, optimality_alpha, learning_types, learning_type_probs, learner_lex_type, learner_learning_type, hypothesis_space, perspective_hyps, perspective_prior_type, perspective_prior_strength, lexicon_prior_type, lexicon_prior_constant, fixed_perspectives=fixed_perspectives, fixed_lexicons=fixed_lexicons)
 
 
         run_simulation_time = time.clock()-t0
@@ -638,36 +685,62 @@ if __name__ == "__main__":
             # print multi_run_lexicons_per_speaker_matrix
 
             real_speaker_perspectives = multi_run_perspectives_per_speaker_matrix[0]
-
-            # print "real_speaker_perspectives are:"
-            # print real_speaker_perspectives
+            print ''
+            print ''
+            print "real_speaker_perspectives are:"
+            print real_speaker_perspectives
 
             real_lexicon = multi_run_lexicons_per_speaker_matrix[0][0]
 
-            # print "real_lexicon is:"
-            # print real_lexicon
+            print "real_lexicon is:"
+            print real_lexicon
 
 
             correct_p_hyp_indices_per_speaker = []
             for speaker_id in range(pop_size):
-                correct_p_hyp_indices = measur.find_correct_hyp_indices_with_speaker_distinction(learner_hypothesis_space, real_speaker_perspectives, speaker_id, real_lexicon, 'perspective')
+                correct_p_hyp_indices = measur.find_correct_hyp_indices_with_speaker_distinction(learner_hypothesis_space, perspective_hyps, lexicon_hyps, real_speaker_perspectives, speaker_id, real_lexicon, 'perspective')
                 correct_p_hyp_indices_per_speaker.append(correct_p_hyp_indices)
                 np.asarray(correct_p_hyp_indices_per_speaker)
 
-            # print "correct_p_hyp_indices_per_speaker are:"
-            # print correct_p_hyp_indices_per_speaker
+
+            for speaker in correct_p_hyp_indices_per_speaker:
+                print ''
+                print ''
+                print "correct_p_hyp_indices this speaker are:"
+                print speaker
+                print "learner_hypothesis_space[speaker[-1]] is:"
+                print learner_hypothesis_space[speaker[-1]]
+                print "perspective_hyps[learner_hypothesis_space[speaker[-1]][0]] is:"
+                print perspective_hyps[learner_hypothesis_space[speaker[-1]][0]]
 
 
             correct_lex_hyp_indices = measur.find_correct_hyp_indices(learner_hypothesis_space, perspective_hyps, lexicon_hyps, real_speaker_perspectives, real_lexicon, 'lexicon')
 
-            # print "correct_lex_hyp_indices are:"
-            # print correct_lex_hyp_indices
+
+            print "correct_lex_hyp_indices are:"
+            print correct_lex_hyp_indices
+
+            print "learner_hypothesis_space[correct_lex_hyp_indices] is:"
+            print learner_hypothesis_space[correct_lex_hyp_indices]
+
+            for hyp in learner_hypothesis_space[correct_lex_hyp_indices]:
+                if hyp[1] <= len(lexicon_hyps):
+                    print "lexicon_hyps[hyp[1]] is:"
+                    print lexicon_hyps[hyp[1]]
 
 
             correct_composite_hyp_indices = measur.find_correct_hyp_indices(learner_hypothesis_space, perspective_hyps, lexicon_hyps, real_speaker_perspectives, real_lexicon, 'composite')
 
+
             print "correct_composite_hyp_indices are:"
             print correct_composite_hyp_indices
+
+            print "learner_hypothesis_space[correct_composite_hyp_indices] is:"
+            print learner_hypothesis_space[correct_composite_hyp_indices]
+
+            if learner_hypothesis_space[correct_composite_hyp_indices][0][1] <= len(lexicon_hyps):
+                print "lexicon_hyps[learner_hypothesis_space[correct_composite_hyp_indices][0][1]] is:"
+                print lexicon_hyps[learner_hypothesis_space[correct_composite_hyp_indices][0][1]]
 
 
             percentiles_p_hyp_posterior_mass_correct_per_speaker = []
@@ -676,59 +749,85 @@ if __name__ == "__main__":
                 percentiles_p_hyp_posterior_mass_correct_per_speaker.append(percentiles_p_hyp_posterior_mass_correct)
             percentiles_p_hyp_posterior_mass_correct_per_speaker = np.asarray(percentiles_p_hyp_posterior_mass_correct_per_speaker)
 
-            # print "percentiles_p_hyp_posterior_mass_correct_per_speaker is:"
-            # print percentiles_p_hyp_posterior_mass_correct_per_speaker
-            # print "percentiles_p_hyp_posterior_mass_correct_per_speaker.shape is:"
-            # print percentiles_p_hyp_posterior_mass_correct_per_speaker.shape
+
+            print ''
+            print ''
+            print ''
+            # print "percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 1] is:"
+            # print percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 1]
+            print "percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 1].shape is:"
+            print percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 1].shape
+
+            print ''
+            print ''
+            # print "percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 3] is:"
+            # print percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 3]
+            print "percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 3].shape is:"
+            print percentiles_p_hyp_posterior_mass_correct_per_speaker[:, 3].shape
 
 
             percentiles_lex_hyp_posterior_mass_correct = measur.calc_hyp_correct_posterior_mass_percentiles(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, correct_lex_hyp_indices)
 
-            # print "percentiles_lex_hyp_posterior_mass_correct is:"
-            # print percentiles_lex_hyp_posterior_mass_correct
-            # print "percentiles_lex_hyp_posterior_mass_correct.shape is:"
-            # print percentiles_lex_hyp_posterior_mass_correct.shape
+            print ''
+            print ''
+            print ''
+            # print "percentiles_lex_hyp_posterior_mass_correct[1] is:"
+            # print percentiles_lex_hyp_posterior_mass_correct[1]
+            print "percentiles_lex_hyp_posterior_mass_correct[1].shape is:"
+            print percentiles_lex_hyp_posterior_mass_correct[1].shape
+
+            print ''
+            print ''
+            # print "percentiles_lex_hyp_posterior_mass_correct[3] is:"
+            # print percentiles_lex_hyp_posterior_mass_correct[3]
+            print "percentiles_lex_hyp_posterior_mass_correct[3].shape is:"
+            print percentiles_lex_hyp_posterior_mass_correct[3].shape
 
             percentiles_composite_hyp_posterior_mass_correct = measur.calc_hyp_correct_posterior_mass_percentiles(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, correct_composite_hyp_indices)
 
-            # print "percentiles_composite_hyp_posterior_mass_correct is:"
-            # print percentiles_composite_hyp_posterior_mass_correct
-            # print "percentiles_composite_hyp_posterior_mass_correct.shape is:"
-            # print percentiles_composite_hyp_posterior_mass_correct.shape
+            print ''
+            print ''
+            print ''
+            # print "percentiles_composite_hyp_posterior_mass_correct[1] is:"
+            # print percentiles_composite_hyp_posterior_mass_correct[1]
+            print "percentiles_composite_hyp_posterior_mass_correct[1].shape is:"
+            print percentiles_composite_hyp_posterior_mass_correct[1].shape
+
+            print ''
+            print ''
+            # print "percentiles_composite_hyp_posterior_mass_correct[3] is:"
+            # print percentiles_composite_hyp_posterior_mass_correct[3]
+            print "percentiles_composite_hyp_posterior_mass_correct[3].shape is:"
+            print percentiles_composite_hyp_posterior_mass_correct[3].shape
 
 
-            percentiles_cumulative_belief_perspective_per_speaker = []
-            for speaker_id in range(pop_size):
-                percentiles_cumulative_belief_perspective = measur.calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, learner_hypothesis_space, multi_run_perspectives_per_speaker_matrix, speaker_id, multi_run_lexicons_per_speaker_matrix, 'perspective')
-                percentiles_cumulative_belief_perspective_per_speaker.append(percentiles_cumulative_belief_perspective)
-            percentiles_cumulative_belief_perspective_per_speaker = np.asarray(percentiles_cumulative_belief_perspective_per_speaker)
-
-            # print "percentiles_cumulative_belief_perspective_per_speaker is:"
-            # print percentiles_cumulative_belief_perspective_per_speaker
-            # print "percentiles_cumulative_belief_perspective_per_speaker.shape is:"
-            # print percentiles_cumulative_belief_perspective_per_speaker.shape
-            # print "np.mean(percentiles_cumulative_belief_perspective_per_speaker[0]) is:"
-            # print np.mean(percentiles_cumulative_belief_perspective_per_speaker[0])
-
-
-            percentiles_cumulative_belief_lexicon = measur.calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, learner_hypothesis_space, multi_run_perspectives_per_speaker_matrix, 0., multi_run_lexicons_per_speaker_matrix, 'lexicon')
-
-            # print "percentiles_cumulative_belief_lexicon is:"
-            # print percentiles_cumulative_belief_lexicon
-            # print "percentiles_cumulative_belief_lexicon.shape is:"
-            # print percentiles_cumulative_belief_lexicon.shape
-            # print "np.mean(percentiles_cumulative_belief_lexicon) is:"
-            # print np.mean(percentiles_cumulative_belief_lexicon)
-
-
-            percentiles_cumulative_belief_composite = measur.calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, n_utterances, multi_run_log_posterior_matrix, learner_hypothesis_space, multi_run_perspectives_per_speaker_matrix, 0., multi_run_lexicons_per_speaker_matrix, 'composite')
-
-            # print "percentiles_cumulative_belief_composite is:"
-            # print percentiles_cumulative_belief_composite
-            # print "percentiles_cumulative_belief_composite.shape is:"
-            # print percentiles_cumulative_belief_composite.shape
-            # print "np.mean(percentiles_cumulative_belief_composite) is:"
-            # print np.mean(percentiles_cumulative_belief_composite)
+            # percentiles_cumulative_belief_perspective_per_speaker = []
+            # for speaker_id in range(pop_size):
+            #     percentiles_cumulative_belief_perspective = measur.calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi_run_log_posterior_matrix, learner_hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_perspectives_per_speaker_matrix, speaker_id, multi_run_lexicons_per_speaker_matrix, 'perspective')
+            #     percentiles_cumulative_belief_perspective_per_speaker.append(percentiles_cumulative_belief_perspective)
+            # percentiles_cumulative_belief_perspective_per_speaker = np.asarray(percentiles_cumulative_belief_perspective_per_speaker)
+            #
+            # print "percentiles_cumulative_belief_perspective_per_speaker[:, 1] is:"
+            # print percentiles_cumulative_belief_perspective_per_speaker[:, 1]
+            # print "percentiles_cumulative_belief_perspective_per_speaker[:, 1].shape is:"
+            # print percentiles_cumulative_belief_perspective_per_speaker[:, 1].shape
+            #
+            #
+            # percentiles_cumulative_belief_lexicon = measur.calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi_run_log_posterior_matrix, learner_hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_perspectives_per_speaker_matrix, 0., multi_run_lexicons_per_speaker_matrix, 'lexicon')
+            #
+            # print "percentiles_cumulative_belief_lexicon[1] is:"
+            # print percentiles_cumulative_belief_lexicon[1]
+            # print "percentiles_cumulative_belief_lexicon[1].shape is:"
+            # print percentiles_cumulative_belief_lexicon[1].shape
+            #
+            #
+            # percentiles_cumulative_belief_composite = measur.calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi_run_log_posterior_matrix, learner_hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_perspectives_per_speaker_matrix, 0., multi_run_lexicons_per_speaker_matrix, 'composite')
+            #
+            #
+            # print "percentiles_cumulative_belief_composite[1] is:"
+            # print percentiles_cumulative_belief_composite[1]
+            # print "percentiles_cumulative_belief_composite[1].shape is:"
+            # print percentiles_cumulative_belief_composite[1].shape
 
 
         if run_type == 'population_same_pop_dist_learner':
@@ -820,38 +919,41 @@ if __name__ == "__main__":
 
     results_pickle_file_title = pickle_file_directory+run_type_dir+'Results_'+file_title
 
-    saveresults.write_results_to_pickle_file(results_pickle_file_title, results_dict)
+    pickle.dump(results_dict, open(results_pickle_file_title+".p", "wb"))
+
 
 
     if run_type == 'population_same_pop_dist_learner':
 
         percentiles_belief_perspective_pickle_file_title = pickle_file_directory+run_type_dir+'Belief_Persp_'+file_title
 
-        saveresults.write_results_to_pickle_file(percentiles_belief_perspective_pickle_file_title, percentiles_p_hyp_posterior_mass_correct_per_speaker)
+        pickle.dump(percentiles_p_hyp_posterior_mass_correct_per_speaker, open(percentiles_belief_perspective_pickle_file_title+".p", "wb"))
+
 
         percentiles_belief_lexicon_pickle_file_title = pickle_file_directory+run_type_dir+'Belief_Lex_'+file_title
 
-        saveresults.write_results_to_pickle_file(percentiles_belief_lexicon_pickle_file_title, percentiles_lex_hyp_posterior_mass_correct)
+        pickle.dump(percentiles_lex_hyp_posterior_mass_correct, open(percentiles_belief_lexicon_pickle_file_title+".p", "wb"))
+
 
         percentiles_belief_composite_pickle_file_title = pickle_file_directory+run_type_dir+'Belief_Comp_'+file_title
 
-        saveresults.write_results_to_pickle_file(percentiles_belief_composite_pickle_file_title, percentiles_composite_hyp_posterior_mass_correct)
+        pickle.dump(percentiles_composite_hyp_posterior_mass_correct, open(percentiles_belief_composite_pickle_file_title+".p", "wb"))
 
 
-
-        percentiles_cumulative_belief_perspective_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Persp_'+file_title
-
-        saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_perspective_pickle_file_title, percentiles_cumulative_belief_perspective_per_speaker)
-
-        percentiles_cumulative_belief_lexicon_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Lex_'+file_title
-
-        saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_lexicon_pickle_file_title, percentiles_cumulative_belief_lexicon)
-
-        percentiles_cumulative_belief_composite_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Comp_'+file_title
-
-        saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_composite_pickle_file_title, percentiles_cumulative_belief_composite)
-
-
+        #
+        # percentiles_cumulative_belief_perspective_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Persp_'+file_title
+        #
+        # saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_perspective_pickle_file_title, percentiles_cumulative_belief_perspective_per_speaker)
+        #
+        # percentiles_cumulative_belief_lexicon_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Lex_'+file_title
+        #
+        # saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_lexicon_pickle_file_title, percentiles_cumulative_belief_lexicon)
+        #
+        # percentiles_cumulative_belief_composite_pickle_file_title = pickle_file_directory+run_type_dir+'Cum_Belief_Comp_'+file_title
+        #
+        # saveresults.write_results_to_pickle_file(percentiles_cumulative_belief_composite_pickle_file_title, percentiles_cumulative_belief_composite)
+        #
+        #
 
 
     write_to_files_time = time.clock()-t2
@@ -885,7 +987,7 @@ if __name__ == "__main__":
         lex_heatmap_title = 'Heatmap of posterior probability distribution over m-s mappings'
 
         # plots.plot_lexicon_heatmap(lex_heatmap_title, plot_file_path, plot_file_title, lex_posterior_matrix)
-        #
+
 
 
         convergence_time_plot_title = 'No. of observations required to reach 1.0-theta posterior on correct hypothesis'
@@ -903,10 +1005,10 @@ if __name__ == "__main__":
         plots.plot_timecourse_scores_percentiles_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
 
 
-        # plots.plot_timecourse_scores_percentiles_without_error_median_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
-        #
-        #
-        # plots.plot_timecourse_scores_percentiles_without_error_mean_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+        plots.plot_timecourse_scores_percentiles_without_error_median_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
+
+
+        plots.plot_timecourse_scores_percentiles_without_error_mean_with_speaker_distinction(scores_plot_title, plot_file_path, plot_file_title, ((n_contexts*n_utterances)+1), percentiles_composite_hyp_posterior_mass_correct, percentiles_p_hyp_posterior_mass_correct_per_speaker,  percentiles_lex_hyp_posterior_mass_correct)
 
 
 

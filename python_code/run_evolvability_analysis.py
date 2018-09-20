@@ -110,7 +110,7 @@ elif learning_type_probs[1] == 1.:
 #learning_type_string = learning_types[np.where(learning_type_probs==1.)[0]]
 
 
-pragmatic_level_initial_pop = 'perspective-taking'  # This can be set to either 'literal', 'perspective-taking' or 'prag'
+pragmatic_level_initial_pop = 'literal'  # This can be set to either 'literal', 'perspective-taking' or 'prag'
 optimality_alpha_initial_pop = 1.0  # Goodman & Stuhlmuller (2013) fitted sal_alpha = 3.4 to participant data with 4x3 lexicon of three number words ('one', 'two', and 'three') that could be mapped to four different world states (0, 1, 2, and 3)
 
 
@@ -169,7 +169,7 @@ communication_type_mutants = 'prag'  # This can be set to either 'lex_only', 'le
 ca_measure_type_mutants = 'comp_only'  # This can be set to either "comp_n_prod" or "comp_only"
 n_interactions = 6  # The number of interactions used to calculate communicative accuracy
 
-selection_type = 'ca_with_parent'  # This can be set to either 'none', 'p_taking', 'l_learning' or 'ca_with_parent'
+selection_type = 'none'  # This can be set to either 'none', 'p_taking', 'l_learning' or 'ca_with_parent'
 selection_weighting = 'none'  # This is a factor with which the fitness of the agents (determined as the probability they assign to the correct perspective hypothesis) is multiplied and then exponentiated in order to weight the relative agent fitness (which in turn determines the probability of becoming a teacher for the next generation). A value of 0. implements neutral selection. A value of 1.0 creates weighting where the fitness is pretty much equal to relative posterior probability on correct p hyp), and the higher the value, the more skewed the weighting in favour of agents with better perspective-taking.
 if isinstance(selection_weighting, float):
     selection_weight_string = str(np.int(selection_weighting))

@@ -1,15 +1,13 @@
 __author__ = 'Marieke Woensdregt'
 
-import random
 
-from scipy.misc import logsumexp
+from scipy.special import logsumexp
 
 import prior
 from hypspace import *
 from data import Data, FixedContextsData, SpeakerAnnotatedData, convert_dataset_to_signal_counts_per_context
 from lex import Lexicon
 from context import *
-import pickle
 
 
 
@@ -44,8 +42,19 @@ def create_speaker_order_single_generation(population, speaker_order_type, n_con
 
 def create_speaker_order_iteration(population, selection_type, parent_probs, parent_type, n_contexts):
     if parent_type == 'sng_teacher' and selection_type == 'none':
+        print ''
+        print ''
+        print 'This is the create_speaker_order_iteration() function in pop.py:'
+        print "population.population is:"
+        print population.population
+        print "len(population.population) is:"
+        print len(population.population)
         speaker = np.random.choice(population.population)
+        print "speaker is:"
+        print speaker
         speaker_order = np.array([speaker for x in range(n_contexts)])
+        print "speaker_order is:"
+        print speaker_order
     elif parent_type == 'multi_teacher' and selection_type == 'none':
         speaker_order = np.random.choice(population.population, size=n_contexts, replace=True)
     elif parent_type == 'sng_teacher' and selection_type == 'p_taking' or selection_type == 'l_learning' or selection_type == 'ca_with_parent':
@@ -316,7 +325,8 @@ class Agent(object):
                         log_signal_probs = np.log(signal_probs)
                         log_signal_probs = np.nan_to_num(log_signal_probs) # turns -inf into a very large negative number
                         # 5) Multiply the probability of that meaning being the intended meaning and the probability of the utterance signal being produced for that meaning (multiplication = addition in logspace):
-                        log_likelihood_for_meaning = log_meaning_prob+log_signal_probs[utterance]
+
+                        log_likelihood_for_meaning = log_meaning_prob+log_signal_probs[int(utterance)]
                         # 6) And add this up for all meanings in the intention distribution to arrive at the full likelihood of the utterance:
                         utterance_log_likelihood = np.logaddexp(utterance_log_likelihood, log_likelihood_for_meaning)
                     # 7) Update the old posterior for this hypothesis by multiplying it with the utterance likelihood calculated at step 6
@@ -800,19 +810,18 @@ class DistinctionAgent(Agent):
             utterances = speaker_annotated_data.utterances[i]
             speaker_id = speaker_annotated_data.speaker_id_matrix[i]
 
+
             # 2.2) For each utterance j that was produced in context i:
             for j in range(len(utterances)):
                 utterance = utterances[j]
-
                 # 2.3) For each hypothesis k in the hypothesis space:
                 for k in range(len(self.hypothesis_space)):
                     composite_hypothesis = self.hypothesis_space[k]
-                    persp_hyp_index = composite_hypothesis[0][speaker_id]
+                    persp_hyp_index = composite_hypothesis[0][int(speaker_id)]
                     lex_hyp_index = composite_hypothesis[1]
                     perspective_hyp = self.perspective_hyps[persp_hyp_index]
                     lexicon_hyp = self.lexicon_hyps[lex_hyp_index]
                     speaker_intention = self.calc_intention(perspective_hyp, context)
-
                     initial_utterance_likelihood = 0.0 # This has to be zero because the probability values for the different meanings are ADDED rather than multiplied
                     utterance_log_likelihood = np.log(initial_utterance_likelihood)
                     utterance_log_likelihood = np.nan_to_num(utterance_log_likelihood) # turns -inf into a very large negative number
@@ -828,7 +837,7 @@ class DistinctionAgent(Agent):
                         log_signal_probs = np.nan_to_num(log_signal_probs) # turns -inf into a very large negative number
 
                         # 5) Multiply the probability of that meaning being the intended meaning and the probability of the utterance signal being produced for that meaning (multiplication = addition in logspace):
-                        log_likelihood_for_meaning = log_meaning_prob+log_signal_probs[utterance]
+                        log_likelihood_for_meaning = log_meaning_prob+log_signal_probs[int(utterance)]
 
                         # 6) And add this up for all meanings in the intention distribution to arrive at the full likelihood of the utterance:
                         utterance_log_likelihood = np.logaddexp(utterance_log_likelihood, log_likelihood_for_meaning)
@@ -839,28 +848,12 @@ class DistinctionAgent(Agent):
 
                 # 8) After updating the posterior for each hypothesis i based on utterance k, we normalize the posterior distribution of the current speaker:
 
-                # TODO: See below for method using logsumexp:
-                # self.log_posteriors = np.subtract(self.log_posteriors, logsumexp(self.log_posteriors))
-
-
-                unlogged_posteriors = np.exp(self.log_posteriors)
-                sum_unlogged_posteriors = np.sum(unlogged_posteriors)
-                log_sum_posteriors = np.log(sum_unlogged_posteriors)
-                self.log_posteriors = np.subtract(self.log_posteriors, log_sum_posteriors)
+                self.log_posteriors = np.subtract(self.log_posteriors, logsumexp(self.log_posteriors))
 
                 # 9) Then we add the new posterior distribution to the matrix that saves the timecourse data_dict:
                 log_posteriors_per_data_point_matrix[counter] = self.log_posteriors
-
                 counter += 1
-
-        # 10) Finally we normalize the matrix that saves the timecourse data_dict:
-
-        unlogged_posteriors_per_data_point_matrix = np.exp(log_posteriors_per_data_point_matrix)
-        sum_unlogged_posteriors_per_data_point_matrix = np.sum(unlogged_posteriors_per_data_point_matrix)
-        log_sum_posteriors_per_data_point_matrix = np.log(sum_unlogged_posteriors_per_data_point_matrix)
-        normalized_log_posteriors_per_data_point_matrix = np.subtract(log_posteriors_per_data_point_matrix, log_sum_posteriors_per_data_point_matrix)
-
-        return normalized_log_posteriors_per_data_point_matrix
+        return log_posteriors_per_data_point_matrix
 
 
 
@@ -1484,6 +1477,15 @@ class MixedPopulation(Population):
                 elif self.pragmatic_level_mutants == 'prag' and learner.pragmatic_level == 'prag':
                     learner_fitness = self.calc_comm_acc(communication_type_mutants, ca_measure_type_mutants, n_interactions, parent, learner)
                 fitness_per_agent[a] = learner_fitness
+        print ''
+        print ''
+        print 'This is the calc_fitness() method of the MixedPopulation class:'
+        print "selection_type is:"
+        print selection_type
+        print "fitness_per_agent is:"
+        print fitness_per_agent
+        print "len(fitness_per_agent) is:"
+        print len(fitness_per_agent)
         return fitness_per_agent
 
 
@@ -1608,6 +1610,15 @@ class MixedPopulation(Population):
 
         parent_fitness_array = self.calc_fitness(selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, self.population, self.parent_index_per_learner, self.parent_generation, self.parent_lex_indices)
 
+        print ''
+        print ''
+        print 'This is the pop_update() method of the MixedPopulation class:'
+        print ''
+        print "parent_fitness_array is:"
+        print parent_fitness_array
+        print "len(parent_fitness_array) is:"
+        print len(parent_fitness_array)
+
         avg_fitness = np.mean(parent_fitness_array)
 
         if selection_weighting == 'none':
@@ -1616,6 +1627,12 @@ class MixedPopulation(Population):
             parent_fitness_array_weighted = np.multiply(parent_fitness_array, selection_weighting)
             parent_fitness_array_weighted_exp = np.exp(parent_fitness_array_weighted)
             parent_probs = np.divide(parent_fitness_array_weighted_exp, np.sum(parent_fitness_array_weighted_exp))
+
+        print ''
+        print parent_probs
+        print "parent_probs are:"
+        print np.sum(parent_probs)
+        print "np.sum(parent_probs) is:"
 
         if turnover_type == 'chain':
             n_agents_to_be_replaced = 1
@@ -1669,11 +1686,16 @@ class MixedPopulation(Population):
             parent_index = self.parent_index_per_learner[i]
             parent = self.population[parent_index]
 
+            print "parent (cultural) is:"
+            print parent
+
             if decoupled == False:
                 bio_parent = parent
 
             elif decoupled == True:
                 bio_parent = np.random.choice(self.population, p=parent_probs)
+                print "bio_parent is:"
+                print bio_parent
 
             if bio_parent.pragmatic_level == 'literal' or bio_parent.pragmatic_level == 'perspective-taking':
                 new_agent = Agent(self.perspective_hyps, self.lexicon_hyps, composite_log_priors, composite_log_priors, new_agent_perspective[0], self.sal_alpha, new_agent_lexicon, new_agent_learning_type[0])
@@ -1708,6 +1730,9 @@ class MixedPopulation(Population):
             agent = self.population[i]
             agent.id = i
             pragmatic_level_per_agent[i] = agent.pragmatic_level
+
+
+
         return selected_hyp_per_agent_matrix, avg_fitness, parent_probs, self.parent_index_per_learner, self.parent_lex_indices, pragmatic_level_per_agent
 
 

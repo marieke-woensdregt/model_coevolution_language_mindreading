@@ -1,7 +1,6 @@
 __author__ = 'Marieke Woensdregt'
 
 
-from params_iteration import *
 import pop
 import lex
 import time

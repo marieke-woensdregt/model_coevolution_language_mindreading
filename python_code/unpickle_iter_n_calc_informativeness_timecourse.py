@@ -1,31 +1,45 @@
 __author__ = 'Marieke Woensdregt'
 
 
-
-from params_iteration import *
-from measur import calc_comm_acc
-import lex
 import numpy as np
 import pickle
 from scipy import stats
-import seaborn as sns
+
+import hypspace
+import lex
+import measur
+import saveresults
+
+
 
 # np.set_printoptions(threshold=np.nan)
 
 
+
 #######################################################################################################################
-# STEP 2: THE PARAMETERS:
+# 1: THE PARAMETERS:
 
 
-# 2.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
+##!!!!!! MAKE SURE TO CHANGE THE PATHS BELOW TO MATCH THE FILE SYSTEM OF YOUR MACHINE:
+directory = '/exports/eddie/scratch/s1370641/'
+
+directory_laptop = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Eddie_Output/'
+
+results_directory = '/Users/pplsuser/Documents/PhD_Edinburgh/My_Modelling/Bayesian_Lang_n_ToM/Results/Pickles/Iteration/'
+
+
+
+# 1.1: The parameters defining the lexicon size (and thus the number of meanings in the world):
 
 n_meanings = 3  # The number of meanings
 n_signals = 3  # The number of signals
 
 
-# 2.2: The parameters defining the contexts and how they map to the agent's saliencies:
 
-context_generation = 'optimal'  # This can be set to either 'random', 'only_helpful' or 'optimal'
+
+# 1.2: The parameters defining the contexts and how they map to the agent's saliencies:
+
+context_generation = 'optimal' # This can be set to either 'random', 'only_helpful', 'optimal'
 if n_meanings == 2:
     helpful_contexts = np.array([[0.1, 0.7], [0.3, 0.9],
                                  [0.7, 0.1], [0.9, 0.3]])
@@ -36,101 +50,126 @@ elif n_meanings == 3:
                                  [0.2, 0.9, 0.1], [0.8, 0.9, 0.1],
                                  [0.9, 0.1, 0.2], [0.9, 0.1, 0.8],
                                  [0.9, 0.2, 0.1], [0.9, 0.8, 0.1]])
-
 elif n_meanings == 4:
-    helpful_contexts = np.array([[0.1, 0.2, 0.3, 0.9], [0.1, 0.7, 0.8, 0.9],
-                                 [0.1, 0.2, 0.9, 0.3], [0.1, 0.7, 0.9, 0.8],
-                                 [0.1, 0.3, 0.2, 0.9], [0.1, 0.8, 0.7, 0.9],
-                                 [0.1, 0.3, 0.9, 0.2], [0.1, 0.8, 0.9, 0.7],
-                                 [0.1, 0.9, 0.2, 0.3], [0.1, 0.9, 0.7, 0.8],
-                                 [0.1, 0.9, 0.3, 0.2], [0.1, 0.9, 0.8, 0.7],
-                                 [0.2, 0.1, 0.3, 0.9], [0.7, 0.1, 0.8, 0.9],
-                                 [0.2, 0.1, 0.9, 0.3], [0.7, 0.1, 0.9, 0.8],
-                                 [0.2, 0.3, 0.1, 0.9], [0.7, 0.8, 0.1, 0.9],
-                                 [0.2, 0.3, 0.9, 0.1], [0.7, 0.8, 0.9, 0.1],
-                                 [0.2, 0.9, 0.1, 0.3], [0.7, 0.9, 0.1, 0.8],
-                                 [0.2, 0.9, 0.3, 0.1], [0.7, 0.9, 0.8, 0.1],
-                                 [0.3, 0.1, 0.2, 0.9], [0.8, 0.1, 0.7, 0.9],
-                                 [0.3, 0.1, 0.9, 0.2], [0.8, 0.1, 0.9, 0.7],
-                                 [0.3, 0.2, 0.1, 0.9], [0.8, 0.7, 0.1, 0.9],
-                                 [0.3, 0.2, 0.9, 0.1], [0.8, 0.7, 0.9, 0.1],
-                                 [0.3, 0.9, 0.1, 0.2], [0.8, 0.9, 0.1, 0.7],
-                                 [0.3, 0.9, 0.2, 0.1], [0.8, 0.9, 0.7, 0.1],
-                                 [0.9, 0.1, 0.2, 0.3], [0.9, 0.1, 0.7, 0.8],
-                                 [0.9, 0.1, 0.3, 0.2], [0.9, 0.1, 0.8, 0.7],
-                                 [0.9, 0.2, 0.1, 0.3], [0.9, 0.7, 0.1, 0.8],
-                                 [0.9, 0.2, 0.3, 0.1], [0.9, 0.7, 0.8, 0.1],
-                                 [0.9, 0.3, 0.1, 0.2], [0.9, 0.8, 0.1, 0.7],
-                                 [0.9, 0.3, 0.2, 0.1], [0.9, 0.8, 0.7, 0.1]])
+    helpful_contexts = np.array([[0.1, 0.2, 0.3, 0.9], [0.1, 0.3, 0.6, 0.7],
+                                 [0.1, 0.2, 0.9, 0.3], [0.1, 0.3, 0.7, 0.6],
+                                 [0.1, 0.3, 0.2, 0.9], [0.1, 0.6, 0.3, 0.7],
+                                 [0.1, 0.3, 0.9, 0.2], [0.1, 0.6, 0.7, 0.3],
+                                 [0.1, 0.9, 0.2, 0.3], [0.1, 0.7, 0.3, 0.6],
+                                 [0.1, 0.9, 0.3, 0.2], [0.1, 0.7, 0.6, 0.3],
+                                 [0.2, 0.1, 0.3, 0.9], [0.3, 0.1, 0.6, 0.7],
+                                 [0.2, 0.1, 0.9, 0.3], [0.3, 0.1, 0.7, 0.6],
+                                 [0.2, 0.3, 0.1, 0.9], [0.3, 0.6, 0.1, 0.7],
+                                 [0.2, 0.3, 0.9, 0.1], [0.3, 0.6, 0.7, 0.1],
+                                 [0.2, 0.9, 0.1, 0.3], [0.3, 0.7, 0.1, 0.6],
+                                 [0.2, 0.9, 0.3, 0.1], [0.3, 0.7, 0.6, 0.1],
+                                 [0.3, 0.1, 0.2, 0.9], [0.6, 0.1, 0.3, 0.7],
+                                 [0.3, 0.1, 0.9, 0.2], [0.6, 0.1, 0.7, 0.3],
+                                 [0.3, 0.2, 0.1, 0.9], [0.6, 0.3, 0.1, 0.7],
+                                 [0.3, 0.2, 0.9, 0.1], [0.6, 0.3, 0.7, 0.1],
+                                 [0.9, 0.1, 0.2, 0.3], [0.6, 0.7, 0.1, 0.3],
+                                 [0.9, 0.1, 0.3, 0.2], [0.6, 0.7, 0.3, 0.1],
+                                 [0.9, 0.2, 0.1, 0.3], [0.7, 0.1, 0.3, 0.6],
+                                 [0.9, 0.2, 0.3, 0.1], [0.7, 0.1, 0.6, 0.3],
+                                 [0.9, 0.3, 0.1, 0.2], [0.7, 0.3, 0.1, 0.6],
+                                 [0.9, 0.3, 0.2, 0.1], [0.7, 0.3, 0.6, 0.1]])
 
 
-# 2.3: The parameters that determine the make-up of the population:
+
+context_type = 'continuous' # This can be set to either 'absolute' for meanings being in/out or 'continuous' for all meanings being present (but in different positions)
+context_size = 1 # This parameter is only used if the context_type is 'absolute' and determines the number of meanings present
+
+sal_alpha = 1. # The exponent that is used by the saliency function. sal_alpha=1 gives a directly proportional relationship between meaning distances and meaning saliencies, with sal_alpha>1 the saliency of meanings goes down exponentially as their distance from the agent increases (and with sal_alpha<1 the other way around)
+
+
+
+error = 0.05 # The error term on production
+error_string = saveresults.convert_array_to_string(error)
+extra_error = True # Determines whether the error specified above gets added on top AFTER the pragmatic speaker has calculated its production probabilities by maximising the utility to the listener.
+
+
+
+
+
+# 1.3: The parameters that determine the make-up of the population:
 
 pop_size = 100
+
+agent_type = 'no_p_distinction' # This can be set to either 'p_distinction' or 'no_p_distinction'. Determines whether the population is made up of DistinctionAgent objects or Agent objects (DistinctionAgents can learn different perspectives for different agents, Agents can only learn one perspective for all agents they learn from).
+
+
+
+
 pragmatic_level = 'literal'  # This can be set to either 'literal', 'perspective-taking' or 'prag'
 optimality_alpha = 1.0  # Goodman & Stuhlmuller (2013) fitted sal_alpha = 3.4 to participant data with 4x3 lexicon of three number words ('one', 'two', and 'three') that could be mapped to four different world states (0, 1, 2, and 3)
+optimality_alpha_string = saveresults.convert_float_value_to_string(optimality_alpha)
+
+
 teacher_type = 'sng_teacher'  # This can be set to either 'sng_teacher' or 'multi_teacher'
-agent_type = 'no_p_distinction'  # This can be set to either 'p_distinction' or 'no_p_distinction'. Determines whether the population is made up of DistinctionAgent objects or Agent objects (DistinctionAgents can learn different perspectives for different agents, Agents can only learn one perspective for all agents they learn from).
 
 
-lexicon_types = ['optimal_lex', 'half_ambiguous_lex', 'fully_ambiguous_lex']  # The lexicon types that can be present in the population
-#FIXME: In the current implementation 'half_ambiguous_lex' can have different instantiations. Therefore, if we run a simulation where there are different lexicon_type_probs, we will want the run_type to be 'population_same_pop' to make sure that all the 'half ambiguous' speakers do have the SAME half ambiguous lexicon.
-lexicon_type_probs = np.array([0., 0., 1.])  # The ratios with which the different lexicon types will be present in the population
-lexicon_type_probs_string = convert_array_to_string(lexicon_type_probs)  # Turns the lexicon type probs into a string in order to add it to file names
+# 1.4: The parameters that determine the learner's hypothesis space:
+
+perspective_hyps = np.array([0., 1.]) # The perspective hypotheses that the learner will consider (1D numpy array)
+
+which_lexicon_hyps = 'all' # Determines the set of lexicon hypotheses that the learner will consider. This can be set to either 'all', 'all_with_full_s_space' or 'only_optimal'
+if which_lexicon_hyps == 'all':
+    lexicon_hyps = hypspace.create_all_lexicons(n_meanings, n_signals) # The lexicon hypotheses that the learner will consider (1D numpy array)
+elif which_lexicon_hyps == 'all_with_full_s_space':
+    all_lexicon_hyps = hypspace.create_all_lexicons(n_meanings, n_signals)
+    lexicon_hyps = hypspace.remove_subset_of_signals_lexicons(all_lexicon_hyps) # The lexicon hypotheses that the learner will consider (1D numpy array)
+elif which_lexicon_hyps == 'only_optimal':
+    lexicon_hyps = hypspace.create_all_optimal_lexicons(n_meanings, n_signals) # The lexicon hypotheses that the learner will consider (1D numpy array)
 
 
-perspectives = np.array([0., 1.])  # The different perspectives that agents can have
-perspective_probs = np.array([0., 1.])  # The ratios with which the different perspectives will be present in the population
-perspective_probs_string = convert_array_to_string(perspective_probs)  # Turns the perspective probs into a string in order to add it to file names
+if agent_type == 'no_p_distinction':
+    hypothesis_space = hypspace.list_hypothesis_space(perspective_hyps, lexicon_hyps) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
+
+elif agent_type == 'p_distinction':
+    hypothesis_space = hypspace.list_hypothesis_space_with_speaker_distinction(perspective_hyps, lexicon_hyps, pop_size) # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
+
+
+
+# 1.5: More parameters that determine the make-up of the population:
+
+lexicon_probs = np.array([0. for x in range(len(lexicon_hyps)-1)]+[1.])
+
+
+perspectives = np.array([0., 1.]) # The different perspectives that agents can have
+perspective_probs = np.array([0., 1.]) # The ratios with which the different perspectives will be present in the population
+perspective_probs_string = saveresults.convert_array_to_string(perspective_probs) # Turns the perspective probs into a string in order to add it to file names
 
 
 learning_types = ['map', 'sample'] # The types of learning that the learners can do
 learning_type_probs = np.array([0., 1.]) # The ratios with which the different learning types will be present in the population
-learning_type_probs_string = convert_array_to_string(learning_type_probs) # Turns the learning type probs into a string in order to add it to file names
+learning_type_probs_string = saveresults.convert_array_to_string(learning_type_probs) # Turns the learning type probs into a string in order to add it to file names
 if learning_type_probs[0] == 1.:
     learning_type_string = learning_types[0]
 elif learning_type_probs[1] == 1.:
     learning_type_string = learning_types[1]
-#learning_type_string = learning_types[np.where(learning_type_probs==1.)[0]]
 
 
+# 1.6: The parameters that determine the learner's prior:
 
-# 2.6: The parameters that determine the learner's hypothesis space:
+learner_type = 'both_unknown'  # This can be set to either 'perspective_unknown', 'lexicon_unknown' or 'both_unknown'
 
-perspective_hyps = np.array([0., 1.])  # The perspective hypotheses that the learner will consider (1D numpy array)
-
-which_lexicon_hyps = 'all'  # Determines the set of lexicon hypotheses that the learner will consider. This can be set to either 'all', 'all_with_full_s_space' or 'only_optimal'
-if which_lexicon_hyps == 'all':
-    lexicon_hyps = create_all_lexicons(n_meanings, n_signals)  # The lexicon hypotheses that the learner will consider (1D numpy array)
-elif which_lexicon_hyps == 'all_with_full_s_space':
-    all_lexicon_hyps = create_all_lexicons(n_meanings, n_signals)
-    lexicon_hyps = remove_subset_of_signals_lexicons(all_lexicon_hyps)  # The lexicon hypotheses that the learner will consider (1D numpy array)
-elif which_lexicon_hyps == 'only_optimal':
-    lexicon_hyps = create_all_optimal_lexicons(n_meanings, n_signals)  # The lexicon hypotheses that the learner will consider (1D numpy array)
-
-
-if agent_type == 'no_p_distinction':
-    hypothesis_space = list_hypothesis_space(perspective_hyps, lexicon_hyps)  # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
-
-elif agent_type == 'p_distinction':
-    hypothesis_space = list_hypothesis_space_with_speaker_distinction(perspective_hyps, lexicon_hyps, pop_size)  # The full space of composite hypotheses that the learner will consider (2D numpy matrix with composite hypotheses on the rows, perspective hypotheses on column 0 and lexicon hypotheses on column 1)
-
-
-# 2.7: The parameters that determine the learner's prior:
 
 learner_perspective = 0.  # The learner's perspective
 
+
 perspective_prior_type = 'egocentric'  # This can be set to either 'neutral', 'egocentric', 'same_as_lexicon' or 'zero_order_tom'
 perspective_prior_strength = 0.9  # The strength of the egocentric prior (only used if the perspective_prior_type is set to 'egocentric')
-perspective_prior_strength_string = convert_array_to_string(perspective_prior_strength)
+perspective_prior_strength_string = saveresults.convert_array_to_string(perspective_prior_strength)
 
 
-lexicon_prior_type = 'neutral'  # This can be set to either 'neutral', 'ambiguous_fixed', 'half_ambiguous_fixed', 'expressivity_bias' or 'compressibility_bias'.
-lexicon_prior_constant = 0.0  # Determines the strength of the lexicon prior, with small c creating a STRONG prior and large c creating a WEAK prior. (And with c = 1000 creating an almost uniform prior.) For the expressivity bias I chose c = 0.3, for the compressibility bias c = 0.0003.
-lexicon_prior_constant_string = convert_array_to_string(lexicon_prior_constant)
+
+lexicon_prior_type = 'neutral'  # This can be set to either 'neutral', 'ambiguous_fixed', 'half_ambiguous_fixed', 'expressivity_bias' or 'compressibility_bias'
+lexicon_prior_constant = 0.0  # Determines the strength of the lexicon bias, with small c creating a STRONG prior and large c creating a WEAK prior. (And with c = 1000 creating an almost uniform prior.)
+lexicon_prior_constant_string = saveresults.convert_array_to_string(lexicon_prior_constant)
 
 
-# 2.5: The parameters that determine the amount of data_dict that the learner gets to see, and the amount of runs of the simulation:
+
+# 1.7: The parameters that determine the amount of data_dict that the learner gets to see, and the amount of runs of the simulation:
 
 n_utterances = 1  # This parameter determines how many signals the learner gets to observe in each context
 n_contexts = 120
@@ -138,7 +177,7 @@ n_contexts = 120
 # The number of contexts that the learner gets to see.
 
 
-# 2.7: The parameters that determine the type and number of simulations that are run:
+# 1.8: The parameters that determine the type and number of simulations that are run:
 
 #FIXME: In the current implementation 'half_ambiguous_lex' can have different instantiations. Therefore, if we run a simulation where there are different lexicon_type_probs, we will want the run_type to be 'population_same_pop' to make sure that all the 'half ambiguous' speakers do have the SAME half ambiguous lexicon.
 run_type = 'iter'  # This parameter determines whether the learner communicates with only one speaker ('dyadic') or with a population ('population_diff_pop' if there are no speakers with the 'half_ambiguous' lexicon type, 'population_same_pop' if there are, 'population_same_pop_dist_learner' if the learner can distinguish between different speakers), or whether we do an iterated learning model ('iter')
@@ -165,11 +204,19 @@ recording = 'minimal'  # This can be set to either 'everything' or 'minimal'. If
 
 which_hyps_on_graph = 'lex_hyps_only'  # This is used in the plot_post_probs_over_lex_hyps() function, and can be set to either 'all_hyps' or 'lex_hyps_only' or 'lex_hyps_collapsed'
 
-n_copies = 20  # Specifies the number of copies of the results file
+n_copies = 200  # Specifies the number of copies of the results file
 copy_specification = ''  # Can be set to e.g. '_c1' or simply to '' if there is only one copy
 
 
 lex_measure = 'ca'  # This can be set to either 'mi' for mutual information or 'ca' for communicative accuracy (of the lexicon with itself)
+
+
+window_convergence_check = 50
+
+bandwith_convergence_check = 0.1
+
+
+pilot = True
 
 #######################################################################################################################
 
@@ -384,23 +431,23 @@ if __name__ == "__main__":
 #     print "folder is:"
 #     print folder
 #
-#     results_directory = directory_laptop+folder+'/'
+#     output_pickle_file_directory = directory_laptop+folder+'/'
 #     print ''
-#     print "results_directory is:"
-#     print results_directory
+#     print "output_pickle_file_directory is:"
+#     print output_pickle_file_directory
 #
 #
 #     if context_generation == 'random':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     print ''
 #     print "filename is:"
 #     print filename
 #
 #
-#     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(results_directory, filename, n_copies, new_hyp_order_handsorted_on_lexicons)
+#     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(output_pickle_file_directory, filename, n_copies, new_hyp_order_handsorted_on_lexicons)
 #     # print "selected_hyps_new_lex_order_all_runs is:"
 #     # print selected_hyps_new_lex_order_all_runs
 #     print "selected_hyps_new_lex_order_all_runs.shape is:"
@@ -445,7 +492,7 @@ if __name__ == "__main__":
 #                            'max_inf': max_inf}
 #
 #
-#     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename+'.p', "wb"))
+#     pickle.dump(inf_over_gens_data_dict, open(output_pickle_file_directory+'lex_inf_data_'+lex_measure+'_'+filename+'.p', "wb"))
 #
 #
 #
@@ -477,22 +524,22 @@ if __name__ == "__main__":
 #     print "folder is:"
 #     print folder
 #
-#     results_directory = directory_laptop+folder+'/'
+#     output_pickle_file_directory = directory_laptop+folder+'/'
 #     print ''
-#     print "results_directory is:"
-#     print results_directory
+#     print "output_pickle_file_directory is:"
+#     print output_pickle_file_directory
 #
 #     if context_generation == 'random':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     print ''
 #     print "filename is:"
 #     print filename
 #
 #
-#     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(results_directory, filename, n_copies, new_hyp_order_handsorted_on_lexicons)
+#     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(output_pickle_file_directory, filename, n_copies, new_hyp_order_handsorted_on_lexicons)
 #     # print "selected_hyps_new_lex_order_all_runs is:"
 #     # print selected_hyps_new_lex_order_all_runs
 #     print "selected_hyps_new_lex_order_all_runs.shape is:"
@@ -536,7 +583,7 @@ if __name__ == "__main__":
 #                            'baseline_inf': baseline_inf,
 #                            'max_inf': max_inf}
 #
-#     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename+'.p', "wb"))
+#     pickle.dump(inf_over_gens_data_dict, open(output_pickle_file_directory+'lex_inf_data_'+lex_measure+'_'+filename+'.p', "wb"))
 #
 #
 #
@@ -561,21 +608,21 @@ if __name__ == "__main__":
 #     print "folder is:"
 #     print folder
 #
-#     results_directory = directory_laptop+folder+'/'
+#     output_pickle_file_directory = directory_laptop+folder+'/'
 #     print ''
-#     print "results_directory is:"
-#     print results_directory
+#     print "output_pickle_file_directory is:"
+#     print output_pickle_file_directory
 #
 #     if context_generation == 'random':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_alpha_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     print ''
 #     print "filename is:"
 #     print filename
 #
-#     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(results_directory, filename, n_copies, new_hyp_order_handsorted_on_lexicons)
+#     selected_hyps_new_lex_order_all_runs = get_selected_hyps_ordered(output_pickle_file_directory, filename, n_copies, new_hyp_order_handsorted_on_lexicons)
 #     # print "selected_hyps_new_lex_order_all_runs is:"
 #     # print selected_hyps_new_lex_order_all_runs
 #     print "selected_hyps_new_lex_order_all_runs.shape is:"
@@ -619,7 +666,7 @@ if __name__ == "__main__":
 #                            'max_inf': max_inf}
 #
 #
-#     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename+'.p', "wb"))
+#     pickle.dump(inf_over_gens_data_dict, open(output_pickle_file_directory+'lex_inf_data_'+lex_measure+'_'+filename+'.p', "wb"))
 #
 
 #
@@ -643,22 +690,22 @@ if __name__ == "__main__":
 #     print "folder is:"
 #     print folder
 #
-#     results_directory = directory_laptop+folder+'/'
+#     output_pickle_file_directory = directory_laptop+folder+'/'
 #     print ''
-#     print "results_directory is:"
-#     print results_directory
+#     print "output_pickle_file_directory is:"
+#     print output_pickle_file_directory
 #
 #     if context_generation == 'random':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     print ''
 #     print "filename is:"
 #     print filename
 #
 #
-#     multi_run_selected_hyps_per_generation_matrix = unpickle_selected_hyps_matrix(results_directory, filename, n_copies)
+#     multi_run_selected_hyps_per_generation_matrix = unpickle_selected_hyps_matrix(output_pickle_file_directory, filename, n_copies)
 #     # print "multi_run_selected_hyps_per_generation_matrix is:"
 #     # print multi_run_selected_hyps_per_generation_matrix
 #     print "multi_run_selected_hyps_per_generation_matrix.shape is:"
@@ -710,11 +757,11 @@ if __name__ == "__main__":
 #                                'max_inf':max_inf}
 #
 #     if context_generation == 'random':
-#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
-#     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
+#     pickle.dump(inf_over_gens_data_dict, open(output_pickle_file_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
 #
 #
 #
@@ -739,21 +786,21 @@ if __name__ == "__main__":
 #     print "folder is:"
 #     print folder
 #
-#     results_directory = directory_laptop+folder+'/'
+#     output_pickle_file_directory = directory_laptop+folder+'/'
 #     print ''
-#     print "results_directory is:"
-#     print results_directory
+#     print "output_pickle_file_directory is:"
+#     print output_pickle_file_directory
 #
 #     if context_generation == 'random':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     print ''
 #     print "filename is:"
 #     print filename
 #
-#     multi_run_selected_hyps_per_generation_matrix = unpickle_selected_hyps_matrix(results_directory, filename, n_copies)
+#     multi_run_selected_hyps_per_generation_matrix = unpickle_selected_hyps_matrix(output_pickle_file_directory, filename, n_copies)
 #     # print "multi_run_selected_hyps_per_generation_matrix is:"
 #     # print multi_run_selected_hyps_per_generation_matrix
 #     print "multi_run_selected_hyps_per_generation_matrix.shape is:"
@@ -808,12 +855,12 @@ if __name__ == "__main__":
 #
 #
 #     if context_generation == 'random':
-#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #
-#     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
+#     pickle.dump(inf_over_gens_data_dict, open(output_pickle_file_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
 #
 #
 #
@@ -839,21 +886,21 @@ if __name__ == "__main__":
 #     print "folder is:"
 #     print folder
 #
-#     results_directory = directory_laptop+folder+'/'
+#     output_pickle_file_directory = directory_laptop+folder+'/'
 #     print ''
-#     print "results_directory is:"
-#     print results_directory
+#     print "output_pickle_file_directory is:"
+#     print output_pickle_file_directory
 #
 #     if context_generation == 'random':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     print ''
 #     print "filename is:"
 #     print filename
 #
-#     multi_run_selected_hyps_per_generation_matrix = unpickle_selected_hyps_matrix(results_directory, filename, n_copies)
+#     multi_run_selected_hyps_per_generation_matrix = unpickle_selected_hyps_matrix(output_pickle_file_directory, filename, n_copies)
 #     # print "multi_run_selected_hyps_per_generation_matrix is:"
 #     # print multi_run_selected_hyps_per_generation_matrix
 #     print "multi_run_selected_hyps_per_generation_matrix.shape is:"
@@ -905,11 +952,11 @@ if __name__ == "__main__":
 #                                'max_inf':max_inf}
 #
 #     if context_generation == 'random':
-#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+#         filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 #
-#     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
+#     pickle.dump(inf_over_gens_data_dict, open(output_pickle_file_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
 #
 #
 #
@@ -931,30 +978,32 @@ if __name__ == "__main__":
 
     perspective_prior_type = 'egocentric'  # This can be set to either 'neutral', 'egocentric', 'same_as_lexicon' or 'zero_order_tom'
     perspective_prior_strength = 0.9  # The strength of the egocentric prior (only used if the perspective_prior_type is set to 'egocentric')
-    perspective_prior_strength_string = convert_array_to_string(perspective_prior_strength)
+    perspective_prior_strength_string = saveresults.convert_array_to_string(perspective_prior_strength)
     selection_type = 'none'
 
     folder = 'results_iter_'+str(n_meanings)+'M_'+str(n_signals)+'S_select_'+selection_type+'_p_prior_'+perspective_prior_type[0:4]+'_'+perspective_prior_strength_string+'_l_prior_'+lexicon_prior_type[0:4]+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]
+    if pilot == True:
+        folder = folder+'_PILOT'
     print ''
     print "folder is:"
     print folder
 
     directory = directory_laptop+folder+'/'
     print ''
-    print "results_directory is:"
+    print "output_pickle_file_directory is:"
     print directory
 
     if selection_type == 'none' or selection_type == 'p_taking':
         if context_generation == 'random':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     elif selection_type == 'ca_with_parent':
         if context_generation == 'random':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     print ''
     print "filename is:"
     print filename
@@ -978,28 +1027,48 @@ if __name__ == "__main__":
     inf_values_last_generation = get_inf_values_last_generation(1, 2, n_iterations, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs)
     print ''
     print ''
-    print "inf_values_last_generation are:"
-    print inf_values_last_generation
+    # print "inf_values_last_generation are:"
+    # print inf_values_last_generation
     print "inf_values_last_generation.shape is:"
     print inf_values_last_generation.shape
 
 
     avg_inf_over_gens_matrix = avg_informativity_over_gens(n_runs, n_copies, n_iterations, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs)
-    print "avg_inf_over_gens_matrix is:"
-    print avg_inf_over_gens_matrix
+    # print "avg_inf_over_gens_matrix is:"
+    # print avg_inf_over_gens_matrix
     print "avg_inf_over_gens_matrix.shape is:"
     print avg_inf_over_gens_matrix.shape
+
+
+
+    convergence_generations_per_run_select_none = measur.check_convergence(avg_inf_over_gens_matrix, window_convergence_check, bandwith_convergence_check)
+    print "convergence_generations_per_run_select_none is:"
+    print convergence_generations_per_run_select_none
+    print "convergence_generations_per_run_select_none.shape is:"
+    print convergence_generations_per_run_select_none.shape
+    print "np.amin(convergence_generations_per_run_select_none) is:"
+    print np.amin(convergence_generations_per_run_select_none)
+    print "np.mean(convergence_generations_per_run_select_none) is:"
+    print np.mean(convergence_generations_per_run_select_none)
+    print "np.amax(convergence_generations_per_run_select_none) is:"
+    print np.amax(convergence_generations_per_run_select_none)
+    print "np.isnan(convergence_generations_per_run_select_none).any() is:"
+    print np.isnan(convergence_generations_per_run_select_none).any()
+
+
+
+
 
     mean_inf_over_gens, conf_intervals_inf_over_gens = calc_mean_and_conf_invs_inf_over_gens(avg_inf_over_gens_matrix)
     print ''
     print ''
-    print "mean_inf_over_gens is:"
-    print mean_inf_over_gens
+    # print "mean_inf_over_gens is:"
+    # print mean_inf_over_gens
     print "mean_inf_over_gens.shape is:"
     print mean_inf_over_gens.shape
     print ''
-    print "conf_intervals_inf_over_gens is:"
-    print conf_intervals_inf_over_gens
+    # print "conf_intervals_inf_over_gens is:"
+    # print conf_intervals_inf_over_gens
     print "conf_intervals_inf_over_gens.shape is:"
     print conf_intervals_inf_over_gens.shape
 
@@ -1016,6 +1085,7 @@ if __name__ == "__main__":
     inf_over_gens_data_dict = {'raw_data':avg_inf_over_gens_matrix,
                                 'inf_values_last_generation':inf_values_last_generation,
                                'mean_inf_over_gens':mean_inf_over_gens,
+                               'convergence_generations_per_run_select_none':convergence_generations_per_run_select_none,
                                'conf_intervals_inf_over_gens':conf_intervals_inf_over_gens,
                                'percentiles_inf_over_gens':percentiles_inf_over_gens,
                                'unique_inf_values':unique_inf_values,
@@ -1023,9 +1093,9 @@ if __name__ == "__main__":
                                'max_inf':max_inf}
 
     if context_generation == 'random':
-        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
 
@@ -1044,32 +1114,34 @@ if __name__ == "__main__":
 
     perspective_prior_type = 'egocentric'  # This can be set to either 'neutral', 'egocentric', 'same_as_lexicon' or 'zero_order_tom'
     perspective_prior_strength = 0.9  # The strength of the egocentric prior (only used if the perspective_prior_type is set to 'egocentric')
-    perspective_prior_strength_string = convert_array_to_string(perspective_prior_strength)
+    perspective_prior_strength_string = saveresults.convert_array_to_string(perspective_prior_strength)
     selection_type = 'ca_with_parent'
     if pragmatic_level == 'literal' and selection_type == 'ca_with_parent':
         pragmatic_level = 'perspective-taking'
 
     folder = 'results_iter_'+str(n_meanings)+'M_'+str(n_signals)+'S_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+ '_p_prior_egoc_09_l_prior_' + lexicon_prior_type[0:4]+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]
+    if pilot == True:
+        folder = folder+'_PILOT'
     print ''
     print "folder is:"
     print folder
 
     directory = directory_laptop+folder+'/'
     print ''
-    print "results_directory is:"
+    print "output_pickle_file_directory is:"
     print directory
 
     if selection_type == 'none' or selection_type == 'p_taking':
         if context_generation == 'random':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_turn_'+str(turnover_type)+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     elif selection_type == 'ca_with_parent':
         if context_generation == 'random':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     print ''
     print "filename is:"
     print filename
@@ -1092,8 +1164,8 @@ if __name__ == "__main__":
     inf_values_last_generation = get_inf_values_last_generation(1, 2, n_iterations, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs)
     print ''
     print ''
-    print "inf_values_last_generation are:"
-    print inf_values_last_generation
+    # print "inf_values_last_generation are:"
+    # print inf_values_last_generation
     print "inf_values_last_generation.shape is:"
     print inf_values_last_generation.shape
 
@@ -1101,22 +1173,40 @@ if __name__ == "__main__":
     avg_inf_over_gens_matrix = avg_informativity_over_gens(n_runs, n_copies, n_iterations, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs)
     print ''
     print ''
-    print "avg_inf_over_gens_matrix is:"
-    print avg_inf_over_gens_matrix
+    # print "avg_inf_over_gens_matrix is:"
+    # print avg_inf_over_gens_matrix
     print "avg_inf_over_gens_matrix.shape is:"
     print avg_inf_over_gens_matrix.shape
+
+
+
+    convergence_generations_per_run_select_ca = measur.check_convergence(avg_inf_over_gens_matrix, window_convergence_check, bandwith_convergence_check)
+    print "convergence_generations_per_run_select_ca is:"
+    print convergence_generations_per_run_select_ca
+    print "convergence_generations_per_run_select_ca.shape is:"
+    print convergence_generations_per_run_select_ca.shape
+    print "np.amin(convergence_generations_per_run_select_ca) is:"
+    print np.amin(convergence_generations_per_run_select_ca)
+    print "np.mean(convergence_generations_per_run_select_ca) is:"
+    print np.mean(convergence_generations_per_run_select_ca)
+    print "np.amax(convergence_generations_per_run_select_ca) is:"
+    print np.amax(convergence_generations_per_run_select_ca)
+    print "np.isnan(convergence_generations_per_run_select_ca).any() is:"
+    print np.isnan(convergence_generations_per_run_select_ca).any()
+
+
 
 
     mean_inf_over_gens, conf_intervals_inf_over_gens = calc_mean_and_conf_invs_inf_over_gens(avg_inf_over_gens_matrix)
     print ''
     print ''
-    print "mean_inf_over_gens is:"
-    print mean_inf_over_gens
+    # print "mean_inf_over_gens is:"
+    # print mean_inf_over_gens
     print "mean_inf_over_gens.shape is:"
     print mean_inf_over_gens.shape
     print ''
-    print "conf_intervals_inf_over_gens is:"
-    print conf_intervals_inf_over_gens
+    # print "conf_intervals_inf_over_gens is:"
+    # print conf_intervals_inf_over_gens
     print "conf_intervals_inf_over_gens.shape is:"
     print conf_intervals_inf_over_gens.shape
 
@@ -1132,6 +1222,7 @@ if __name__ == "__main__":
 
     inf_over_gens_data_dict = {'raw_data':avg_inf_over_gens_matrix,
                                'inf_values_last_generation':inf_values_last_generation,
+                               'convergence_generations_per_run_select_ca':convergence_generations_per_run_select_ca,
                                'mean_inf_over_gens':mean_inf_over_gens,
                                'conf_intervals_inf_over_gens':conf_intervals_inf_over_gens,
                                'percentiles_inf_over_gens':percentiles_inf_over_gens,
@@ -1140,9 +1231,9 @@ if __name__ == "__main__":
                                'max_inf':max_inf}
 
     if context_generation == 'random':
-        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
 
     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
@@ -1164,31 +1255,33 @@ if __name__ == "__main__":
 
     perspective_prior_type = 'egocentric'  # This can be set to either 'neutral', 'egocentric', 'same_as_lexicon' or 'zero_order_tom'
     perspective_prior_strength = 0.9  # The strength of the egocentric prior (only used if the perspective_prior_type is set to 'egocentric')
-    perspective_prior_strength_string = convert_array_to_string(perspective_prior_strength)
+    perspective_prior_strength_string = saveresults.convert_array_to_string(perspective_prior_strength)
     selection_type = 'p_taking'
 
 
     folder = 'results_iter_'+str(n_meanings)+'M_'+str(n_signals)+'S_select_'+selection_type+'_p_prior_egoc_09_l_prior_'+lexicon_prior_type[0:4]+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]
+    if pilot == True:
+        folder = folder+'_PILOT'
     print ''
     print "folder is:"
     print folder
 
     directory = directory_laptop+folder+'/'
     print ''
-    print "results_directory is:"
+    print "output_pickle_file_directory is:"
     print directory
 
     if selection_type == 'none' or selection_type == 'p_taking':
         if context_generation == 'random':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     elif selection_type == 'ca_with_parent':
         if context_generation == 'random':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
         elif context_generation == 'only_helpful' or context_generation == 'optimal':
-            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+            filename = run_type+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_'+agent_type+'_select_'+selection_type+'_'+communication_type+'_'+ca_measure_type+'_'+str(n_runs)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     print ''
     print "filename is:"
     print filename
@@ -1212,8 +1305,8 @@ if __name__ == "__main__":
     inf_values_last_generation = get_inf_values_last_generation(1, 2, n_iterations, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs)
     print ''
     print ''
-    print "inf_values_last_generation are:"
-    print inf_values_last_generation
+    # print "inf_values_last_generation are:"
+    # print inf_values_last_generation
     print "inf_values_last_generation.shape is:"
     print inf_values_last_generation.shape
 
@@ -1221,21 +1314,42 @@ if __name__ == "__main__":
     avg_inf_over_gens_matrix = avg_informativity_over_gens(n_runs, n_copies, n_iterations, inf_per_lex_full_hyp_space, selected_hyps_new_lex_order_all_runs)
     print ''
     print ''
-    print "avg_inf_over_gens_matrix is:"
-    print avg_inf_over_gens_matrix
+    # print "avg_inf_over_gens_matrix is:"
+    # print avg_inf_over_gens_matrix
     print "avg_inf_over_gens_matrix.shape is:"
     print avg_inf_over_gens_matrix.shape
+
+
+
+
+    convergence_generations_per_run_select_p_taking = measur.check_convergence(avg_inf_over_gens_matrix, window_convergence_check, bandwith_convergence_check)
+    print "convergence_generations_per_run_select_p_taking is:"
+    print convergence_generations_per_run_select_p_taking
+    print "convergence_generations_per_run_select_p_taking.shape is:"
+    print convergence_generations_per_run_select_p_taking.shape
+    print "np.amin(convergence_generations_per_run_select_p_taking) is:"
+    print np.amin(convergence_generations_per_run_select_p_taking)
+    print "np.mean(convergence_generations_per_run_select_p_taking) is:"
+    print np.mean(convergence_generations_per_run_select_p_taking)
+    print "np.amax(convergence_generations_per_run_select_p_taking) is:"
+    print np.amax(convergence_generations_per_run_select_p_taking)
+    print "np.isnan(convergence_generations_per_run_select_p_taking).any() is:"
+    print np.isnan(convergence_generations_per_run_select_p_taking).any()
+
+
+
+
 
     mean_inf_over_gens, conf_intervals_inf_over_gens = calc_mean_and_conf_invs_inf_over_gens(avg_inf_over_gens_matrix)
     print ''
     print ''
-    print "mean_inf_over_gens is:"
-    print mean_inf_over_gens
+    # print "mean_inf_over_gens is:"
+    # print mean_inf_over_gens
     print "mean_inf_over_gens.shape is:"
     print mean_inf_over_gens.shape
     print ''
-    print "conf_intervals_inf_over_gens is:"
-    print conf_intervals_inf_over_gens
+    # print "conf_intervals_inf_over_gens is:"
+    # print conf_intervals_inf_over_gens
     print "conf_intervals_inf_over_gens.shape is:"
     print conf_intervals_inf_over_gens.shape
 
@@ -1251,6 +1365,7 @@ if __name__ == "__main__":
 
     inf_over_gens_data_dict = {'raw_data':avg_inf_over_gens_matrix,
                                'inf_values_last_generation':inf_values_last_generation,
+                               'convergence_generations_per_run_select_p_taking':convergence_generations_per_run_select_p_taking,
                                'mean_inf_over_gens':mean_inf_over_gens,
                                'conf_intervals_inf_over_gens':conf_intervals_inf_over_gens,
                                'percentiles_inf_over_gens':percentiles_inf_over_gens,
@@ -1259,9 +1374,9 @@ if __name__ == "__main__":
                                'max_inf':max_inf}
 
     if context_generation == 'random':
-        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
     elif context_generation == 'only_helpful' or context_generation == 'optimal':
-        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_l_probs_'+lexicon_type_probs_string+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
+        filename_short = run_type[0:4]+'_'+str(n_meanings)+'M_'+str(n_signals)+'S'+'_size_'+str(pop_size)+'_select_'+selection_type+'_'+str(n_runs*n_copies)+'_R_'+str(n_iterations)+'_I_'+str(n_contexts)+'_C_'+str(context_generation)+'_'+str(len(helpful_contexts))+'_'+str(n_utterances)+'_U_'+'err_'+error_string+'_'+pragmatic_level+'_a_'+str(optimality_alpha)[0]+'_p_probs_'+perspective_probs_string+'_p_prior_'+str(perspective_prior_type)[0:4]+'_'+perspective_prior_strength_string+'_'+which_lexicon_hyps+'_l_prior_'+str(lexicon_prior_type)[0:4]+'_'+lexicon_prior_constant_string+'_'+learning_type_string+'_'+teacher_type
 
     pickle.dump(inf_over_gens_data_dict, open(results_directory+'lex_inf_data_'+lex_measure+'_'+filename_short+'.p', "wb"))
 

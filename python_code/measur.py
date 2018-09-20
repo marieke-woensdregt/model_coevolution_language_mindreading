@@ -1,6 +1,6 @@
 __author__ = 'Marieke Woensdregt'
 
-from scipy.misc import logsumexp
+from scipy.special import logsumexp
 from scipy.spatial.distance import pdist
 
 from prior import *
@@ -422,64 +422,7 @@ def calc_hyp_correct_posterior_mass_percentiles(n_runs, n_contexts, n_utterances
 
 
 
-
-
-
-def calc_hyp_correct_posterior_mass_per_speaker(n_runs, n_contexts, hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_log_posterior_per_speaker_matrix, perspectives_per_speaker, lexicons_per_speaker, which_hyps):
-    """
-    :param n_runs: Number of runs
-    :param n_contexts: Number of contexts observed
-    :param n_utterances: Number of utterances observed per context
-    :param multi_run_log_posterior_per_speaker_matrix: A 4D numpy array containing the log posteriors calculated over each utterance, over each context, per speaker, per run. With axis 0 = runs, axis 1 = speakers, axis 2 = contexts, axis 3 = hypotheses
-    :param perspectives_per_speaker: A 1D numpy array containing the perspective for each speaker in the population
-    :param lexicons_per_speaker: A 1D numpy array containing the lexicon for each speaker in the population
-    :param which_hyps: Over which hypotheses we want to calculate the correct posterior mass. This can be set to either 'perspective', 'lexicon' or 'composite'
-    :return: 3D numpy array containing the percentiles (25, 50 and 75) and the means of posterior probability mass on the correct hypotheses per speaker. Axis 0 = speaker, axis 1 = percentiles or mean (in order percentile25, percentile50 (=median), percentile75, mean), axis 2 = contexts.
-    """
-    multi_run_log_posterior_per_speaker_matrix_swapped = np.swapaxes(multi_run_log_posterior_per_speaker_matrix, 0, 1)
-    nan_template = [['NaN' for hyp in range(len(lexicon_hyps)*len(perspective_hyps))] for context in range((n_contexts+1))] # It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    nan_template = np.array(nan_template)
-    nan_template_shape = nan_template.shape
-    all_speakers_multi_run_log_posteriors_padded = np.zeros((len(multi_run_log_posterior_per_speaker_matrix_swapped), n_runs, (n_contexts+1), (len(lexicon_hyps)*len(perspective_hyps)))) # It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    for speaker_index in range(len(multi_run_log_posterior_per_speaker_matrix_swapped)):
-        speaker_multi_run_log_posteriors = multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index]
-        for r in range(n_runs):
-            run = speaker_multi_run_log_posteriors[r]
-            run_shape = run.shape
-            difference = nan_template_shape[0] - run_shape[0]
-            pad = nan_template[:difference]
-            padded_run = np.vstack((run, pad))
-            all_speakers_multi_run_log_posteriors_padded[speaker_index][r] = padded_run
-    posterior_correct_mass_per_speaker_accumulator = np.zeros((len(multi_run_log_posterior_per_speaker_matrix_swapped), n_runs, (n_contexts+1))) # It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    for speaker_index in range(len(all_speakers_multi_run_log_posteriors_padded)):
-        for run in range(len(all_speakers_multi_run_log_posteriors_padded[speaker_index])):
-            speaker_perspective = perspectives_per_speaker[run][speaker_index]
-            speaker_lexicon = lexicons_per_speaker[run][speaker_index]
-            correct_hyp_indices = find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker_perspective, speaker_lexicon, which_hyps)
-            for context in range(len(all_speakers_multi_run_log_posteriors_padded[speaker_index][run])):
-                log_posteriors = all_speakers_multi_run_log_posteriors_padded[speaker_index][run][context]
-                log_posterior_mass_correct = logsumexp(log_posteriors[correct_hyp_indices])
-                posterior_mass_correct_exp = np.exp(log_posterior_mass_correct)
-                posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_mass_correct_exp
-    percentiles_and_mean_per_speaker_matrix = np.zeros((len(posterior_correct_mass_per_speaker_accumulator), 4, (n_contexts+1))) # The hard-coded 4 here comes from the fact that percentiles contains 4 things (i.e. i. first quartile, ii. median, iii. third quartile, iv. mean). It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    #FIXME: A problem with this function is that depending on where in the posterior_correct_mass_accumulator the NaNs are located, the function will be able to calculate some of the percentiles but not others, which will then later give problems in the plotting. So if we want this measure to work normally we have to makes sure that the different speakers get to produce at exactly the same context number in each run. Otherwise there is no way to calculate the mean, median and quartiles.
-    for speaker_index in range(len(posterior_correct_mass_per_speaker_accumulator)):
-        posterior_correct_mass_accumulator = posterior_correct_mass_per_speaker_accumulator[speaker_index]
-        percentile_25 = np.percentile(posterior_correct_mass_accumulator, q=25, axis=0)
-        percentile_50 = np.percentile(posterior_correct_mass_accumulator, q=50, axis=0)
-        percentile_75 = np.percentile(posterior_correct_mass_accumulator, q=75, axis=0)
-        mean = np.mean(posterior_correct_mass_accumulator, axis=0)
-        percentiles_and_mean = np.array([percentile_25, percentile_50, percentile_75, mean])
-        percentiles_and_mean_per_speaker_matrix[speaker_index] = percentiles_and_mean
-    return np.asarray(percentiles_and_mean_per_speaker_matrix)
-
-
-
-
-
-
-
-def calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi_run_log_posterior_matrix, hypothesis_space, perspectives_per_speaker, speaker_index, lexicons_per_speaker, which_hyps):
+def calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi_run_log_posterior_matrix, hypothesis_space, perspective_hyps, lexicon_hyps, perspectives_per_speaker, speaker_index, lexicons_per_speaker, which_hyps):
     """
     :param n_runs: Number of runs
     :param n_contexts: Number of contexts per run
@@ -494,8 +437,8 @@ def calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi
     log_prior = multi_run_log_posterior_matrix[0][0]
     for run in range(n_runs):
         speaker_perspectives = perspectives_per_speaker[run]
-        speaker_lexicon = lexicons_per_speaker[run][speaker_index]
-        correct_hyp_indices = find_correct_hyp_indices_with_speaker_distinction(hypothesis_space, speaker_perspectives, speaker_index, speaker_lexicon, which_hyps)
+        speaker_lexicon = lexicons_per_speaker[run][int(speaker_index)]
+        correct_hyp_indices = find_correct_hyp_indices_with_speaker_distinction(hypothesis_space, perspective_hyps, lexicon_hyps, speaker_perspectives, speaker_index, speaker_lexicon, which_hyps)
         for context in range(len(multi_run_log_posterior_matrix[run])):
             log_posteriors = multi_run_log_posterior_matrix[run][context]
             log_posterior_mass_correct = logsumexp(log_posteriors[correct_hyp_indices])
@@ -513,141 +456,6 @@ def calc_cumulative_belief_in_correct_hyps_per_speaker(n_runs, n_contexts, multi
     mean = np.mean(posterior_correct_mass_accumulator, axis=0)
     std = np.std(posterior_correct_mass_accumulator, axis=0)
     return np.asarray([percentile_25, percentile_50, percentile_75, mean, std])
-
-
-
-
-
-
-def calc_belief_in_correct_hyps(n_runs, n_contexts, pop_size, hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_log_posterior_per_speaker_matrix, perspectives_per_speaker, lexicons_per_speaker, which_hyps):
-    """
-    :param n_runs: Number of runs
-    :param n_contexts: Number of contexts per run
-    :param n_utterances: Number of utterances per context
-    :param multi_run_log_posterior_per_speaker_matrix: A 4D numpy array with axis 0 = runs, axis 1 = speakers, axis 2 = (contexts*utterances) and axis 3 = composite hypotheses
-    :param perspectives_per_speaker: A 1D numpy array containing the perspectives for each speaker in the population (matching by index)
-    :param lexicons_per_speaker: A 3D numpy array containing the perspectives for each speaker in the population (matching by index). With axis 0 = speakers, axis 1 = meanings and axis 2 = signals
-    :param which_hyps: Determines for which part or composite hypothesis the percentiles should be calculated. Can be set to either 'perspective', 'lexicon' or 'composite'
-    :return: A list containing where index 0 = first quartile (i.e. percentile 25), index 1 = median (i.e. percentile 50), index 2 = third quartile (i.e. percentile 75) and index 3 = mean.
-    """
-    multi_run_log_posterior_per_speaker_matrix_swapped = np.swapaxes(multi_run_log_posterior_per_speaker_matrix, 0, 1)
-    posterior_correct_mass_per_speaker_accumulator = np.zeros((len(multi_run_log_posterior_per_speaker_matrix_swapped), n_runs, (n_contexts+1))) # It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0
-    for run in range(n_runs):
-        for speaker_index in range(pop_size):
-            speaker_perspective = perspectives_per_speaker[run][speaker_index]
-            speaker_lexicon = lexicons_per_speaker[run][speaker_index]
-            correct_hyp_indices = find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker_perspective, speaker_lexicon, which_hyps)
-            for context in range(len(multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index][run])):
-                log_posteriors = multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index][run][context]
-                log_posterior_mass_correct = logsumexp(log_posteriors[correct_hyp_indices])
-                posterior_mass_correct_exp = np.exp(log_posterior_mass_correct)
-                if np.isnan(posterior_mass_correct_exp):
-                    posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context-1]
-                else:
-                    posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_mass_correct_exp
-    percentiles_and_mean_per_speaker_matrix = np.zeros((len(posterior_correct_mass_per_speaker_accumulator), 4, (n_contexts+1))) # The hard-coded 4 here comes from the fact that percentiles contains 4 things (i.e. i. first quartile, ii. median, iii. third quartile, iv. mean). It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    for speaker_index in range(len(posterior_correct_mass_per_speaker_accumulator)):
-        posterior_correct_mass_accumulator = posterior_correct_mass_per_speaker_accumulator[speaker_index]
-        percentile_25 = np.percentile(posterior_correct_mass_accumulator, q=25, axis=0)
-        percentile_50 = np.percentile(posterior_correct_mass_accumulator, q=50, axis=0)
-        percentile_75 = np.percentile(posterior_correct_mass_accumulator, q=75, axis=0)
-        mean = np.mean(posterior_correct_mass_accumulator, axis=0)
-        percentiles_and_mean = np.array([percentile_25, percentile_50, percentile_75, mean])
-        percentiles_and_mean_per_speaker_matrix[speaker_index] = percentiles_and_mean
-    return percentiles_and_mean_per_speaker_matrix
-
-
-
-
-
-
-def calc_cumulative_belief_in_correct_hyps_old(n_runs, n_contexts, pop_size, hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_log_posterior_per_speaker_matrix, perspectives_per_speaker, lexicons_per_speaker, which_hyps):
-    """
-    :param n_runs: Number of runs
-    :param n_contexts: Number of contexts per run
-    :param n_utterances: Number of utterances per context
-    :param multi_run_log_posterior_per_speaker_matrix: A 4D numpy array with axis 0 = runs, axis 1 = speakers, axis 2 = (contexts*utterances) and axis 3 = composite hypotheses
-    :param perspectives_per_speaker: A 1D numpy array containing the perspectives for each speaker in the population (matching by index)
-    :param lexicons_per_speaker: A 3D numpy array containing the perspectives for each speaker in the population (matching by index). With axis 0 = speakers, axis 1 = meanings and axis 2 = signals
-    :param which_hyps: Determines for which part or composite hypothesis the percentiles should be calculated. Can be set to either 'perspective', 'lexicon' or 'composite'
-    :return: A list containing where index 0 = first quartile (i.e. percentile 25), index 1 = median (i.e. percentile 50), index 2 = third quartile (i.e. percentile 75) and index 3 = mean.
-    """
-    multi_run_log_posterior_per_speaker_matrix_swapped = np.swapaxes(multi_run_log_posterior_per_speaker_matrix, 0, 1)
-    posterior_correct_mass_per_speaker_accumulator = np.zeros((len(multi_run_log_posterior_per_speaker_matrix_swapped), n_runs, (n_contexts+1))) # It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0
-    for run in range(n_runs):
-        for speaker_index in range(pop_size):
-            speaker_perspective = perspectives_per_speaker[run][speaker_index]
-            speaker_lexicon = lexicons_per_speaker[run][speaker_index]
-            correct_hyp_indices = find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker_perspective, speaker_lexicon, which_hyps)
-            for context in range(len(multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index][run])):
-                log_posteriors = multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index][run][context]
-                log_posterior_mass_correct = logsumexp(log_posteriors[correct_hyp_indices])
-                posterior_mass_correct_exp = np.exp(log_posterior_mass_correct)
-                #FIXME: It is probably possible to get rid of the if-else here.
-                if context == 0:
-                    posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_mass_correct_exp
-                else:
-                    if np.isnan(posterior_mass_correct_exp):
-                        posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context-1]
-                    else:
-                        posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context-1] + posterior_mass_correct_exp
-    percentiles_and_mean_per_speaker_matrix = np.zeros((len(posterior_correct_mass_per_speaker_accumulator), 4, (n_contexts+1))) # The hard-coded 4 here comes from the fact that percentiles contains 4 things (i.e. i. first quartile, ii. median, iii. third quartile, iv. mean). It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    for speaker_index in range(len(posterior_correct_mass_per_speaker_accumulator)):
-        posterior_correct_mass_accumulator = posterior_correct_mass_per_speaker_accumulator[speaker_index]
-        percentile_25 = np.percentile(posterior_correct_mass_accumulator, q=25, axis=0)
-        percentile_50 = np.percentile(posterior_correct_mass_accumulator, q=50, axis=0)
-        percentile_75 = np.percentile(posterior_correct_mass_accumulator, q=75, axis=0)
-        mean = np.mean(posterior_correct_mass_accumulator, axis=0)
-        percentiles_and_mean = np.array([percentile_25, percentile_50, percentile_75, mean])
-        percentiles_and_mean_per_speaker_matrix[speaker_index] = percentiles_and_mean
-    return percentiles_and_mean_per_speaker_matrix
-
-
-
-def calc_cumulative_belief_in_correct_hyps_minus_prior(n_runs, n_contexts, pop_size, hypothesis_space, perspective_hyps, lexicon_hyps, multi_run_log_posterior_per_speaker_matrix, perspectives_per_speaker, lexicons_per_speaker, which_hyps):
-    """
-    :param n_runs: Number of runs
-    :param n_contexts: Number of contexts per run
-    :param n_utterances: Number of utterances per context
-    :param multi_run_log_posterior_per_speaker_matrix: A 4D numpy array with axis 0 = runs, axis 1 = speakers, axis 2 = (contexts*utterances) and axis 3 = composite hypotheses
-    :param perspectives_per_speaker: A 1D numpy array containing the perspectives for each speaker in the population (matching by index)
-    :param lexicons_per_speaker: A 3D numpy array containing the perspectives for each speaker in the population (matching by index). With axis 0 = speakers, axis 1 = meanings and axis 2 = signals
-    :param which_hyps: Determines for which part or composite hypothesis the percentiles should be calculated. Can be set to either 'perspective', 'lexicon' or 'composite'
-    :return: A list containing where index 0 = first quartile (i.e. percentile 25), index 1 = median (i.e. percentile 50), index 2 = third quartile (i.e. percentile 75) and index 3 = mean.
-    """
-    multi_run_log_posterior_per_speaker_matrix_swapped = np.swapaxes(multi_run_log_posterior_per_speaker_matrix, 0, 1)
-    posterior_correct_mass_per_speaker_accumulator = np.zeros((len(multi_run_log_posterior_per_speaker_matrix_swapped), n_runs, (n_contexts+1))) # It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0
-    log_prior = multi_run_log_posterior_per_speaker_matrix_swapped[0][0][0]
-    for run in range(n_runs):
-        for speaker_index in range(pop_size):
-            speaker_perspective = perspectives_per_speaker[run][speaker_index]
-            speaker_lexicon = lexicons_per_speaker[run][speaker_index]
-            correct_hyp_indices = find_correct_hyp_indices(hypothesis_space, perspective_hyps, lexicon_hyps, speaker_perspective, speaker_lexicon, which_hyps)
-            for context in range(len(multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index][run])):
-                log_posteriors = multi_run_log_posterior_per_speaker_matrix_swapped[speaker_index][run][context]
-                log_posterior_mass_correct = logsumexp(log_posteriors[correct_hyp_indices])
-                posterior_mass_correct_exp = np.exp(log_posterior_mass_correct)
-                log_prior_mass_correct = logsumexp(log_prior[correct_hyp_indices])
-                prior_mass_correct_exp = np.exp(log_prior_mass_correct)
-                posterior_mass_correct_exp_minus_prior = np.subtract(posterior_mass_correct_exp, prior_mass_correct_exp)
-                #FIXME: It is probably possible to get rid of the if-else here.
-                if context == 0:
-                    posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_mass_correct_exp_minus_prior
-                else:
-                    if np.isnan(posterior_mass_correct_exp_minus_prior):
-                        posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context-1]
-                    else:
-                        posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context] = posterior_correct_mass_per_speaker_accumulator[speaker_index][run][context-1] + posterior_mass_correct_exp_minus_prior
-    percentiles_and_mean_per_speaker_matrix = np.zeros((len(posterior_correct_mass_per_speaker_accumulator), 4, (n_contexts+1))) # The hard-coded 4 here comes from the fact that percentiles contains 4 things (i.e. i. first quartile, ii. median, iii. third quartile, iv. mean). It's (n_contexts+1) here because the first set of posteriors that will be shown in the plot are the initial posteriors at context 0.
-    for speaker_index in range(len(posterior_correct_mass_per_speaker_accumulator)):
-        posterior_correct_mass_accumulator = posterior_correct_mass_per_speaker_accumulator[speaker_index]
-        percentile_25 = np.percentile(posterior_correct_mass_accumulator, q=25, axis=0)
-        percentile_50 = np.percentile(posterior_correct_mass_accumulator, q=50, axis=0)
-        percentile_75 = np.percentile(posterior_correct_mass_accumulator, q=75, axis=0)
-        mean = np.mean(posterior_correct_mass_accumulator, axis=0)
-        percentiles_and_mean = np.array([percentile_25, percentile_50, percentile_75, mean])
-        percentiles_and_mean_per_speaker_matrix[speaker_index] = percentiles_and_mean
-    return percentiles_and_mean_per_speaker_matrix
 
 
 
@@ -842,49 +650,12 @@ def create_lex_posterior_matrix(n_runs, n_meanings, n_signals, hypothesis_space,
 # No. of observation measures for comparing learning rate in different input order conditions:
 
 
-#TODO: why not use np.where for the function below?
-
-def calc_no_of_contexts_for_ceiling_OLD(multi_run_log_posterior_matrix, correct_hyp_indices, ceiling):
-    """
-    :param multi_run_log_posterior_matrix: A 3D numpy matrix containing all log posterior values, with shape (n_runs, n_contexts, n_hypotheses)
-    :correct_hyp_indices: The index of the single correct composite hypothesis
-    :param ceiling: The posterior probability ceiling that needs to be exceeded for learning to be considered at 'ceiling' (e.g. 0.99).
-    :return: A list containing 0) first quartile, 1) median and 2) third quartile for number of contexts (i.e. observations) needed to exceed ceiling
-    """
-    n_contexts_per_run = np.zeros(len(multi_run_log_posterior_matrix))
-    for i in range(len(multi_run_log_posterior_matrix)):
-        run = multi_run_log_posterior_matrix[i]
-        j = 0
-        while n_contexts_per_run[i] == 0:
-            context = run[j]
-            for hyp in context[correct_hyp_indices]:
-                if np.exp(hyp) > ceiling:
-                    n_contexts_per_run[i] = j
-                elif j == len(multi_run_log_posterior_matrix):
-                    n_contexts_per_run[i] = "NaN"
-            j += 1
-    return n_contexts_per_run
-
-
 
 def calc_no_of_contexts_for_ceiling(correct_hyp_posterior_mass, ceiling):
-    """
-    :param correct_composite_hyp_posterior_mass: A 3D numpy matrix containing all log posterior values, with shape (n_runs, n_contexts, n_hypotheses)
-    :correct_hyp_indices: The index of the single correct composite hypothesis
-    :param ceiling: The posterior probability ceiling that needs to be exceeded for learning to be considered at 'ceiling' (e.g. 0.99).
-    :return: A list containing 0) first quartile, 1) median and 2) third quartile for number of contexts (i.e. observations) needed to exceed ceiling
-    """
-    n_contexts_per_run = np.zeros(len(correct_hyp_posterior_mass))
-    for i in range(len(correct_hyp_posterior_mass)):
-        run = correct_hyp_posterior_mass[i]
-        j = 0
-        while n_contexts_per_run[i] == 0:
-            context = run[j]
-            if context > ceiling:
-                n_contexts_per_run[i] = j
-            elif j == (len(correct_hyp_posterior_mass[0])-1):
-                n_contexts_per_run[i] = "NaN"
-            j += 1
+    n_contexts_per_run = np.array([np.nan for x in range(len(correct_hyp_posterior_mass))])
+    for r in range(len(correct_hyp_posterior_mass)):
+        if len(np.argwhere(correct_hyp_posterior_mass[r]>ceiling)) != 0:
+            n_contexts_per_run[r] = np.argwhere(correct_hyp_posterior_mass[r]>ceiling)[0][0]
     return n_contexts_per_run
 
 
@@ -915,3 +686,23 @@ def calc_std_of_final_posteriors(multi_run_log_posterior_matrix):
     unlogged_final_log_posterior_matrix = np.exp(final_log_posterior_matrix)
     std_final_posteriors = np.std(unlogged_final_log_posterior_matrix, axis=0)
     return std_final_posteriors
+
+
+
+def check_convergence(multi_run_over_gens_matrix, window, bandwith):
+    convergence_generation_per_run = np.zeros(len(multi_run_over_gens_matrix))
+    for r in range(len(multi_run_over_gens_matrix)):
+        difference = bandwith+1
+        i = 0
+        while difference >= bandwith:
+            gens_window = multi_run_over_gens_matrix[r][i:window+i]
+            max_gens_window = np.amax(gens_window)
+            min_gens_window = np.amin(gens_window)
+            difference = max_gens_window-min_gens_window
+            if difference < bandwith:
+                convergence_generation_per_run[r] = window+i
+            if window+i == len(multi_run_over_gens_matrix[r]):
+                convergence_generation_per_run[r] = "NaN"
+                break
+            i += 1
+    return convergence_generation_per_run

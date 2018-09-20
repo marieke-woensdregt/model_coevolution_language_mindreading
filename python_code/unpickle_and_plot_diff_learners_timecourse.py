@@ -2,11 +2,9 @@ __author__ = 'Marieke Woensdregt'
 
 
 import numpy as np
-import params
 import hypspace
 import prior
 from saveresults import convert_array_to_string
-from saveresults import write_results_to_pickle_file
 import pickle
 import measur
 import plots

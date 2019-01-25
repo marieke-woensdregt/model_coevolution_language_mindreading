@@ -22,7 +22,7 @@ def create_all_lexicons(n_meanings, n_signals):
     :return: A 3D numpy matrix containing all possible lexicons, ranging from each meaning mapping to only one signal to each meaning mapping to each signal, and all possible combinations in between. Lexicons consist of binary mappings between meanings and signals, with meanings on the rows and signals on the columns. Axis 0 = lexicons, axis 1 = meanings, axis 2 = signals.
     """
     all_lexicons = []
-    # 1) First we create a list of all possible rows, that contains each possible combination of 1s (i.e. m-s mappings) in the row, ranging from one m-s mapping to all signals mapping to the meaning:
+    # 1) First we create a list of all possible rows, that contains each possible combination of 1s (c.e. m-s mappings) in the row, ranging from one m-s mapping to all signals mapping to the meaning:
     all_rows = []
     for i in range(1, (n_signals + 1)):
         signal_combis = list(itertools.combinations(range(n_signals), i))
@@ -161,7 +161,7 @@ def create_mirror_image_lexicon(n_meanings, n_signals):
     """
     :param n_meanings: The number of meanings
     :param n_signals: The number of signals
-    :return: A 2D numpy matrix with meanings on the rows and signals on the columns. This lexicon constitutes the exact mirror image of having 1s on the diagonal. (i.e. signal n maps to meaning 0, signal n-1 to meaning 1 etc.)
+    :return: A 2D numpy matrix with meanings on the rows and signals on the columns. This lexicon constitutes the exact mirror image of having 1s on the diagonal. (c.e. signal n maps to meaning 0, signal n-1 to meaning 1 etc.)
     """
     if n_meanings != n_signals:
         print "Sorry, the create_system_opposite() function only works with a symmetrical matrix"

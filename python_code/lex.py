@@ -26,14 +26,14 @@ class Lexicon(object):
 
     def empty_lex(self):
         """
-        :return: An empty lexicon (i.e. all m-s mappings are 0.0)
+        :return: An empty lexicon (c.e. all m-s mappings are 0.0)
         """
         lexicon = np.zeros((self.n_meanings, self.n_signals))
         return lexicon
 
     def optimal_lex(self):
         """
-        :return: An optimal lexicon in which each meaning is associated with just 1 signal, distributing the available signals over the meanings as evenly as possible (i.e. avoiding homonymy)
+        :return: An optimal lexicon in which each meaning is associated with just 1 signal, distributing the available signals over the meanings as evenly as possible (c.e. avoiding homonymy)
         """
         lexicon = self.empty_lex()
         if self.n_meanings > self.n_signals:
@@ -67,7 +67,7 @@ class Lexicon(object):
 
     def fully_ambiguous_lex(self):
         """
-        :return: A lexicon in which all meanings are mapped to all signals (i.e. all m-s mappings are 1.0)
+        :return: A lexicon in which all meanings are mapped to all signals (c.e. all m-s mappings are 1.0)
         """
         lexicon = np.ones((self.n_meanings, self.n_signals))
         return lexicon
@@ -147,6 +147,9 @@ def calc_lex_informativity(lexicon, error_prob):
 
 
 
+
+
+
 def calc_prod_probs(lexicon, error_prob):
     prod_probs = np.zeros_like(lexicon)
     for m in range(len(lexicon)):
@@ -166,7 +169,7 @@ def calc_prod_probs(lexicon, error_prob):
 
 def calc_rec_probs(lexicon, error_prob):
     """
-    :param lexicon: 2D numpy array with meanings on the rows and signals on the columns (expect only binary association weights between meanings and signals, i.e. 0 or 1!)
+    :param lexicon: 2D numpy array with meanings on the rows and signals on the columns (expect only binary association weights between meanings and signals, c.e. 0 or 1!)
     :param error_prob: probability of making an error in production
     :return: reception probabilities with SIGNALS ON THE ROWS AND MEANINGS ON THE COLUMNS. So rows sum to 1.
     """
@@ -209,3 +212,12 @@ def calc_ca_all_lexicons(lexicon_hyps, error_prob, lex_measure):
         ca_per_lexicon[l] = ca_lex
     return ca_per_lexicon
 
+
+def create_lex_indices_per_inf_value_sorted_dict(informativity_per_lexicon_sorted, unique_inf_values):
+    lex_indices_per_inf_value_sorted_dict = {}
+    for inf_value in unique_inf_values:
+        # TODO: Why don't I just use np.where() here? I think the output of that function IS suitable for indexing (as opposed to np.argwhere)
+        inf_value_indices = np.argwhere(informativity_per_lexicon_sorted == inf_value)
+        inf_value_indices = inf_value_indices.flatten()
+        lex_indices_per_inf_value_sorted_dict[str(inf_value)] = inf_value_indices
+    return lex_indices_per_inf_value_sorted_dict

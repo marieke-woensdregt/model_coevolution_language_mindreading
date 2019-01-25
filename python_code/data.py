@@ -21,7 +21,7 @@ class Data(object):
     def __init__(self, context_matrix, topic_matrix, utterance_matrix):
         """
         :param context_matrix: A 2D numpy matrix of contexts
-        :param topic_matrix: A 2D numpy matrix of topics (i.e. intended meanings)
+        :param topic_matrix: A 2D numpy matrix of topics (c.e. intended meanings)
         :param utterance_matrix: A 2D numpy matrix of utterances
         :return: Creates a data_dict object with initial context matrix attribute and utterance_matrix_same_first attribute
         """
@@ -52,7 +52,7 @@ class FixedContextsData(object):
     def __init__(self, context_matrix, topic_matrix, signal_counts_per_context_matrix, helpful_contexts):
         """
         :param context_matrix: A 2D numpy matrix of contexts
-        :param topic_matrix: A 2D numpy matrix of topics (i.e. intended meanings)
+        :param topic_matrix: A 2D numpy matrix of topics (c.e. intended meanings)
         :param signal_counts_per_context_matrix: A 2D numpy array containing the signal counts for each context (should have shape = (n_contexts, n_signals)).
         :return: Creates a data_dict object with initial context matrix attribute and utterance_matrix_same_first attribute
         """
@@ -117,7 +117,7 @@ def calc_n_datasets(n_meanings, n_observations):
     """
     :param n_meanings: int -- the number of meanings in the lexicon
     :param n_observations: int -- the number of observations each learner receives
-    :return: int -- the total number of possible UNIQUE datasets (i.e. combinations, without permutations).
+    :return: int -- the total number of possible UNIQUE datasets (c.e. combinations, without permutations).
     """
     n_datasets = (factorial(n_observations+(n_meanings-1))) / ((factorial(n_observations))*factorial(n_meanings-1))
     return n_datasets
@@ -211,7 +211,7 @@ def create_all_possible_signal_counts_per_context_dataset_permtuations(n_signals
 def calc_n_permutations_per_dataset(all_datasets):
     """
     :param all_datasets: 2D numpy array of datasets, where each dataset has size equal to n_observations.
-    :return: 1D numpy array containing the number of permutations for each dataset. This number is calculated using the formula for distinguishable permutations: N! / (n1!)(n2!)...(nk!) where n1, n2, ..., nk stands for the frequency of the different distinguishable elements (i.e. different signals) in the combination (i.e. the dataset), and n1+n2+...+nk = N.
+    :return: 1D numpy array containing the number of permutations for each dataset. This number is calculated using the formula for distinguishable permutations: N! / (n1!)(n2!)...(nk!) where n1, n2, ..., nk stands for the frequency of the different distinguishable elements (c.e. different signals) in the combination (c.e. the dataset), and n1+n2+...+nk = N.
     """
     n_permutations_per_dataset_matrix = np.zeros(len(all_datasets))
     for d in range(len(all_datasets)):

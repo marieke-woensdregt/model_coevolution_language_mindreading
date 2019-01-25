@@ -1,7 +1,7 @@
 __author__ = 'Marieke Woensdregt'
 
 
-from scipy.special import logsumexp
+from scipy.misc import logsumexp
 
 import prior
 from hypspace import *
@@ -42,19 +42,8 @@ def create_speaker_order_single_generation(population, speaker_order_type, n_con
 
 def create_speaker_order_iteration(population, selection_type, parent_probs, parent_type, n_contexts):
     if parent_type == 'sng_teacher' and selection_type == 'none':
-        print ''
-        print ''
-        print 'This is the create_speaker_order_iteration() function in pop.py:'
-        print "population.population is:"
-        print population.population
-        print "len(population.population) is:"
-        print len(population.population)
         speaker = np.random.choice(population.population)
-        print "speaker is:"
-        print speaker
         speaker_order = np.array([speaker for x in range(n_contexts)])
-        print "speaker_order is:"
-        print speaker_order
     elif parent_type == 'multi_teacher' and selection_type == 'none':
         speaker_order = np.random.choice(population.population, size=n_contexts, replace=True)
     elif parent_type == 'sng_teacher' and selection_type == 'p_taking' or selection_type == 'l_learning' or selection_type == 'ca_with_parent':
@@ -68,7 +57,7 @@ def create_speaker_order_iteration(population, selection_type, parent_probs, par
 
 class Agent(object):
     """
-    An agent object contains the agent's priors, hypothesis space, perspective and lexicon, and the necessary methods to do production, reception and learning (i.e. updating its posteriors and lexicon through Bayesian inference).
+    An agent object contains the agent's priors, hypothesis space, perspective and lexicon, and the necessary methods to do production, reception and learning (c.e. updating its posteriors and lexicon through Bayesian inference).
     """
     def __init__(self, perspective_hyps, lexicon_hyps, log_priors, log_posteriors, perspective, sal_alpha, lexicon, learning_type, pragmatic_level=None):
         """
@@ -125,7 +114,7 @@ class Agent(object):
         """
         :param agent_perspective: The perspective of the agent for whom we want to calculate the intention distribution (can be self.perspective or that of another agent) (float)
         :param context: The context for which we want to calculate the intention distribution given agent_perspective (1D numpy array)
-        :return: The intention distribution (i.e. probability of choosing meanings as topic meaning) given agent_perspective and context (1D numpy array) (This is simply a normalized version of the saliency array.)
+        :return: The intention distribution (c.e. probability of choosing meanings as topic meaning) given agent_perspective and context (1D numpy array) (This is simply a normalized version of the saliency array.)
         """
         saliencies = self.calc_saliencies(agent_perspective, context)
         intention = np.divide(saliencies, np.sum(saliencies))
@@ -144,7 +133,7 @@ class Agent(object):
     def calc_signal_probs(self, lexicon, meaning, error):
         """
         :param lexicon: (Hypothesized) lexicon for which we want to calculate the signal probabilities given a meaning
-        :param meaning: The meaning (i.e. index in range 0, n_meanings) for which we want to calculate the signal probabilities
+        :param meaning: The meaning (c.e. index in range 0, n_meanings) for which we want to calculate the signal probabilities
         :return: A 1D numpy array containing the probabilities with which each signal will be uttered for parameter meaning given parameter lexicon
         """
         meaning_row = lexicon[meaning]
@@ -160,7 +149,7 @@ class Agent(object):
     def calc_meaning_probs(self, lexicon, signal, error):
         """
         :param lexicon: (Hypothesized) lexicon for which we want to calculate the meaning probabilities given a particular signal
-        :param signal: The signal (i.e. index in range 0, n_signals) for which we want to calculate the meaning probabilities
+        :param signal: The signal (c.e. index in range 0, n_signals) for which we want to calculate the meaning probabilities
         :return: A 1D numpy array containing the probabilities that each of the meanings is intended given signal and lexicon
         """
         lexicon_transposed = lexicon.T
@@ -219,7 +208,7 @@ class Agent(object):
 
 
     def calc_literal_speaker(self, context, lexicon, error, perspective, alpha):
-        topic_dist = calc_intention(perspective, context, alpha)
+        topic_dist = self.calc_intention(perspective, context)
         literal_speaker = np.zeros((lexicon.shape[1], lexicon.shape[0]))
         for m in range(lexicon.shape[0]):
             signal_probs = self.calc_signal_probs(lexicon, m, error)
@@ -238,9 +227,10 @@ class Agent(object):
         return pragmatic_speaker
 
     def calc_pragmatic_listener_rec_probs(self, speaker_prod_probs):
-        pragmatic_listener_rec_probs = np.zeros((speaker_prod_probs.shape[0], speaker_prod_probs.shape[1]))
+        speaker_normalized = np.divide(speaker_prod_probs, np.sum(speaker_prod_probs))
+        pragmatic_listener_rec_probs = np.zeros((speaker_normalized.shape[0], speaker_normalized.shape[1]))
         for s in range(len(speaker_prod_probs.T)):
-            pragmatic_listener_rec_probs[s] = np.divide(speaker_prod_probs.T[s], np.sum(speaker_prod_probs.T[s]))
+            pragmatic_listener_rec_probs[s] = np.divide(speaker_normalized.T[s], np.sum(speaker_normalized.T[s]))
         return pragmatic_listener_rec_probs
 
     def calc_pragmatic_listener(self, context, speaker_lex, speaker_p, speaker_type, error, sal_alpha):
@@ -250,8 +240,23 @@ class Agent(object):
             return pragmatic_listener
         elif speaker_type == 'prag':
             speaker_prod_probs = self.calc_pragmatic_speaker(pragmatic_listener)
-            pragmatic_listener = self.calc_pragmatic_listener_rec_probs(speaker_prod_probs)
+
+
+            ### BELOW IS THE NEW STUFF ADDED ON 12 DEC 2018:
+            topic_dist = self.calc_intention(speaker_p, context)
+            topic_dist_reshaped = topic_dist.reshape(topic_dist.shape[0], -1)
+            speaker_times_topic_probs = np.exp(np.add(np.log(speaker_prod_probs), np.log(topic_dist_reshaped)))
+            pragmatic_speaker_normalized = np.divide(speaker_times_topic_probs, np.sum(speaker_times_topic_probs))
+
+
+            pragmatic_listener_old = self.calc_pragmatic_listener_rec_probs(speaker_prod_probs)
+
+            ### BELOW IS THE NEW STUFF ADDED ON 12 DEC 2018:
+            pragmatic_listener = self.calc_pragmatic_listener_rec_probs(pragmatic_speaker_normalized)
+
             return pragmatic_listener
+
+
 
 
     def calc_topic_probs(self, comprehension_type, context, perspective=None):
@@ -289,7 +294,7 @@ class Agent(object):
         :update: Updates self.log_posteriors after going through the whole set of data_dict
         :return: A 2D numpy array with each row representing an update in the log_posteriors over time, where there is one row for each utterance, and the columns represent the different composite hypotheses.
         """
-        posteriors_per_data_point_matrix = np.zeros((((n_contexts*n_utterances)+1), len(self.hypothesis_space))) #+1 is added because the original prior distribution (i.e. the distribution of belief before making any observations) will be the first posterior to be saved to the matrix
+        posteriors_per_data_point_matrix = np.zeros((((n_contexts*n_utterances)+1), len(self.hypothesis_space))) #+1 is added because the original prior distribution (c.e. the distribution of belief before making any observations) will be the first posterior to be saved to the matrix
         log_posteriors_per_data_point_matrix = np.log(posteriors_per_data_point_matrix)
         log_posteriors_per_data_point_matrix[0] = self.log_posteriors
         # 1) For each hypothesis in the hypothesis space:
@@ -333,7 +338,7 @@ class Agent(object):
                     self.log_posteriors[i] += utterance_log_likelihood
                     log_posteriors_per_data_point_matrix[counter][i] = self.log_posteriors[i]
                     counter += 1
-        # 8.i) After updating the posteriors for all hypotheses for the full data_dict set, normalize each posterior distribution that has been saved into the log_posteriors_per_data_point_matrix:
+        # 8.c) After updating the posteriors for all hypotheses for the full data_dict set, normalize each posterior distribution that has been saved into the log_posteriors_per_data_point_matrix:
 
 
         # print ''
@@ -344,45 +349,35 @@ class Agent(object):
         # sums_matrix = logsumexp(log_posteriors_per_data_point_matrix, axis=1) # Creates a matrix that contains the sum over each row in the log_posteriors_per_data_point_matrix
         #
         # print ''
-        # print "sums_matrix using logsumexp is:"
+        # print ''
+        # print ''
+        # print "sums_matrix USING logsumexp is:"
         # print sums_matrix
 
         unlogged_posteriors_per_data_point_matrix = np.exp(log_posteriors_per_data_point_matrix)
         sums_matrix_new = np.sum(unlogged_posteriors_per_data_point_matrix, axis=1)
         sums_matrix = np.log(sums_matrix_new)
 
+        # print ''
+        # print ''
+        # print ''
+        # print "sums_matrix AVOIDING logsumexp is:"
+        # print sums_matrix
+
+
         sums_matrix = sums_matrix[:, np.newaxis] # Reshapes the sums matrix so that it can be subtracted from the log_posteriors_per_data_point_matrix (subtraction in logspace = division in normal space)
 
         # print ''
-        # print "sums_matrix OLD method avoiding logsumexp is:"
+        # print ''
+        # print ''
+        # print "sums_matrix AFTER RESHAPING is:"
         # print sums_matrix
 
         normalized_log_posteriors_per_data_point_matrix = np.subtract(log_posteriors_per_data_point_matrix, sums_matrix)
 
         # 9) Normalize the current posterior distribution:
 
-
-        # print ''
-        # print ''
-        # print 'This is the inference() method of the Agent class:'
-        #
-        # #TODO: See below for method using logsumexp:
-        # normalized_log_posteriors = np.subtract(self.log_posteriors, logsumexp(self.log_posteriors))
-        #
-        # print ''
-        # print ''
-        # print "np.exp(normalized_log_posteriors) using logsumexp are:"
-        # print np.exp(normalized_log_posteriors)
-
-        unlogged_posteriors = np.exp(self.log_posteriors)
-        sum_unlogged_posteriors = np.sum(unlogged_posteriors)
-        log_sum_posteriors = np.log(sum_unlogged_posteriors)
-        normalized_log_posteriors = np.subtract(self.log_posteriors, log_sum_posteriors)
-
-        # print ''
-        # print ''
-        # print "np.exp(normalized_log_posteriors) OLD method avoiding logsumexp are:"
-        # print np.exp(normalized_log_posteriors)
+        normalized_log_posteriors = np.subtract(self.log_posteriors, logsumexp(self.log_posteriors))
 
         # 10) And update the agent's attribute self.log_posteriors to the newly calculated log_posteriors:
         self.log_posteriors = normalized_log_posteriors
@@ -429,6 +424,7 @@ class Agent(object):
         # pickle.dump(log_likelihood_array, open(log_likelihood_pickle_file_name, 'wb'))
         # else:
         #     log_likelihoods = log_likelihood_array[dataset_index]
+        log_likelihoods = np.nan_to_num(log_likelihoods)
         return log_likelihoods
 
 
@@ -436,6 +432,7 @@ class Agent(object):
     # def inference_on_signal_counts_data(self, signal_counts_data, dataset_array_pickle_file_name, log_likelihood_pickle_file_name, error):
         log_likelihoods = self.log_likelihoods_on_signal_counts_data(signal_counts_data, error)
         self.log_posteriors += log_likelihoods
+        self.log_posteriors = np.nan_to_num(self.log_posteriors)
         self.log_posteriors = np.subtract(self.log_posteriors, logsumexp(self.log_posteriors))
         return self.log_posteriors
 
@@ -465,7 +462,7 @@ class Agent(object):
         Updates the agent's lexicon by taking its current log_posteriors, picking the winning hypothesis by use of self.learning_type, and setting the agents lexicon to that of the winning hypothesis
         """
         lexicon_per_posterior_array = self.lexicon_hyps
-        # The following for-loop creates an array of which the lexicons on the indices match the indices of the hypothesis_space (i.e. the full set of lexicons repeated for as many times as there are different perspective hypotheses
+        # The following for-loop creates an array of which the lexicons on the indices match the indices of the hypothesis_space (c.e. the full set of lexicons repeated for as many times as there are different perspective hypotheses
         for i in range((len(self.perspective_hyps)-1)):
             lexicon_per_posterior_array = np.append(lexicon_per_posterior_array, self.lexicon_hyps, axis=0)
         winning_hyp_index = self.pick_winning_hyp()
@@ -621,7 +618,7 @@ class PragmaticAgent(Agent):
         :update: Updates self.log_posteriors after going through the whole set of data_dict
         :return: A 2D numpy array with each row representing an update in the log_posteriors over time, where there is one row for each utterance, and the columns represent the different composite hypotheses.
         """
-        posteriors_per_data_point_matrix = np.zeros((((n_contexts*n_utterances)+1), len(self.hypothesis_space))) #+1 is added because the original prior distribution (i.e. the distribution of belief before making any observations) will be the first posterior to be saved to the matrix
+        posteriors_per_data_point_matrix = np.zeros((((n_contexts*n_utterances)+1), len(self.hypothesis_space))) #+1 is added because the original prior distribution (c.e. the distribution of belief before making any observations) will be the first posterior to be saved to the matrix
         log_posteriors_per_data_point_matrix = np.log(posteriors_per_data_point_matrix)
         log_posteriors_per_data_point_matrix[0] = self.log_posteriors
         # 1) For each hypothesis in the hypothesis space:
@@ -658,7 +655,7 @@ class PragmaticAgent(Agent):
                     self.log_posteriors[i] += utterance_log_likelihood
                     log_posteriors_per_data_point_matrix[counter][i] = self.log_posteriors[i]
                     counter += 1
-        # 8.i) After updating the posteriors for all hypotheses for the full data_dict set, normalize each posterior distribution that has been saved into the log_posteriors_per_data_point_matrix:
+        # 8.c) After updating the posteriors for all hypotheses for the full data_dict set, normalize each posterior distribution that has been saved into the log_posteriors_per_data_point_matrix:
 
 
         # print ''
@@ -765,7 +762,7 @@ class PragmaticAgent(Agent):
 
 class DistinctionAgent(Agent):
     """
-    This is an agent that can distinguish between different speakers (i.e. has separate probability distributions for the different speakers that it encounters)
+    This is an agent that can distinguish between different speakers (c.e. has separate probability distributions for the different speakers that it encounters)
     """
 
     def __init__(self, perspective_hyps, lexicon_hyps, log_priors, log_posteriors, perspective, alpha, lexicon, learning_type, n_speakers):
@@ -795,7 +792,7 @@ class DistinctionAgent(Agent):
         """
 
         # 1) First the matrix is created that will save the log posteriors for each data_dict point the learner observes:
-        posteriors_per_data_point_matrix = np.zeros((((n_contexts*n_utterances)+1), len(self.hypothesis_space))) #+1 is added because the original prior distribution (i.e. the distribution of belief before making any observations) will be the first posterior to be saved to the matrix
+        posteriors_per_data_point_matrix = np.zeros((((n_contexts*n_utterances)+1), len(self.hypothesis_space))) #+1 is added because the original prior distribution (c.e. the distribution of belief before making any observations) will be the first posterior to be saved to the matrix
         log_posteriors_per_data_point_matrix = np.log(posteriors_per_data_point_matrix)
         ## 1.2) The first posterior distribution is the prior:
         log_posteriors_per_data_point_matrix[0] = self.log_posteriors
@@ -811,7 +808,7 @@ class DistinctionAgent(Agent):
             speaker_id = speaker_annotated_data.speaker_id_matrix[i]
 
 
-            # 2.2) For each utterance j that was produced in context i:
+            # 2.2) For each utterance j that was produced in context c:
             for j in range(len(utterances)):
                 utterance = utterances[j]
                 # 2.3) For each hypothesis k in the hypothesis space:
@@ -846,7 +843,7 @@ class DistinctionAgent(Agent):
 
                     self.log_posteriors[k] += utterance_log_likelihood
 
-                # 8) After updating the posterior for each hypothesis i based on utterance k, we normalize the posterior distribution of the current speaker:
+                # 8) After updating the posterior for each hypothesis c based on utterance k, we normalize the posterior distribution of the current speaker:
 
                 self.log_posteriors = np.subtract(self.log_posteriors, logsumexp(self.log_posteriors))
 
@@ -1114,37 +1111,27 @@ class Population(object):
         :return:
         """
         pop_log_posteriors = self.get_all_log_posteriors_matrix()
-        pop_posteriors_unlogged = np.exp(pop_log_posteriors)
         fitness_per_agent = np.ones(self.size)
         for a in range(self.size):
-            learner_posteriors = pop_posteriors_unlogged[a]
-            learner_posteriors_split_on_p_hyps = np.split(learner_posteriors, len(self.perspective_hyps))
-            learner_fitness = 0.
-
+            learner_log_posteriors = pop_log_posteriors[a]
+            learner_log_posteriors_split_on_p_hyps = np.array(np.split(learner_log_posteriors, len(self.perspective_hyps)))
             learner = self.population[a]
-
-            parent_index = parent_index_per_learner[a]
+            parent_index = int(parent_index_per_learner[a])
             if len(parents) == 0:
                 parent = learner
             else:
-                parent = parents[parent_index.astype(int)]
-
+                parent = parents[parent_index]
             if selection_type == 'p_taking':
-                #TODO: Write this part of the function to be the same as the 'l_learning' part?
                 parent_perspective = parent.perspective
-                for p in range(len(self.perspective_hyps)):
-                    p_frequency = self.perspective_probs[p]
-                    p_posteriors = learner_posteriors_split_on_p_hyps[p]
-                    p_posteriors_times_freq = np.multiply(p_posteriors, p_frequency)
-                    p_posteriors_times_freq_sum = np.sum(p_posteriors_times_freq)
-                    learner_fitness += p_posteriors_times_freq_sum
+                parent_p_index = np.where(self.perspective_hyps == parent_perspective)[0][0]
+                p_log_posteriors = learner_log_posteriors_split_on_p_hyps[parent_p_index, :]
+                learner_fitness = np.exp(logsumexp(p_log_posteriors))
                 fitness_per_agent[a] = learner_fitness
 
             elif selection_type == 'l_learning':
-                parent_lex_index = parent_lex_indices[a]
-                learner_posteriors_split_on_p_hyps = np.array(learner_posteriors_split_on_p_hyps)
-                l_posteriors = learner_posteriors_split_on_p_hyps[:, parent_lex_index]
-                learner_fitness = np.sum(l_posteriors)
+                parent_lex_index = int(parent_lex_indices[a])
+                l_log_posteriors = learner_log_posteriors_split_on_p_hyps[:, parent_lex_index]
+                learner_fitness = np.exp(logsumexp(l_log_posteriors))
                 fitness_per_agent[a] = learner_fitness
 
             elif selection_type == 'ca_with_parent':
@@ -1279,7 +1266,7 @@ class Population(object):
             selected_hyp_per_agent_matrix[i] = selected_hyp
             self.lex_indices_per_agent[i] = selected_lex_hyp
 
-            # 1.6) Then, we remove the oldest agent (i.e. agent with index 0) from the population, and append the new agent at the end:
+            # 1.6) Then, we remove the oldest agent (c.e. agent with index 0) from the population, and append the new agent at the end:
             self.population = np.delete(self.population, 0)
             self.population = np.append(self.population, new_agent)  # Appends the new agent to the end of the population
             self.perspectives_per_agent = np.delete(self.perspectives_per_agent, 0)
@@ -1335,7 +1322,7 @@ class Population(object):
 
     def print_population(self):
         """
-        Prints each agent (i.e. the agent's attributes) with it's respective index number on a new line
+        Prints each agent (c.e. the agent's attributes) with it's respective index number on a new line
         """
         for i in range(len(self.population)):
             print 
@@ -1436,7 +1423,7 @@ class MixedPopulation(Population):
         return population
 
 
-    def calc_fitness(self, selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, learners, parent_index_per_learner, parents, parent_lex_indices):
+    def calc_fitness_old(self, selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, learners, parent_index_per_learner, parents, parent_lex_indices):
         """
         :param selection_type: This can be set to either 'p_taking', 'l_learning' or 'ca_with_parent'
         :param selection_weighting: This determines the strength of the selection (the larger the stronger)
@@ -1457,7 +1444,6 @@ class MixedPopulation(Population):
                 parent = parents[parent_index.astype(int)]
             if selection_type == 'p_taking':
                 #TODO: Write this part of the function to be the same as the 'l_learning' part?
-                parent_perspective = parent.perspective
                 for p in range(len(self.perspective_hyps)):
                     p_frequency = self.perspective_probs[p]
                     p_posteriors = learner_posteriors_split_on_p_hyps[p]
@@ -1477,20 +1463,62 @@ class MixedPopulation(Population):
                 elif self.pragmatic_level_mutants == 'prag' and learner.pragmatic_level == 'prag':
                     learner_fitness = self.calc_comm_acc(communication_type_mutants, ca_measure_type_mutants, n_interactions, parent, learner)
                 fitness_per_agent[a] = learner_fitness
-        print ''
-        print ''
-        print 'This is the calc_fitness() method of the MixedPopulation class:'
-        print "selection_type is:"
-        print selection_type
-        print "fitness_per_agent is:"
-        print fitness_per_agent
-        print "len(fitness_per_agent) is:"
-        print len(fitness_per_agent)
         return fitness_per_agent
 
 
+
+
+    def calc_fitness(self, selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, learners, parent_index_per_learner, parents, parent_lex_indices):
+
+    #def calc_fitness(self, selection_type, selection_weighting, communication_type, ca_measure_type, n_interactions, parent_index_per_learner, parents, parent_lex_indices):
+        """
+        :param selection_type: This can be set to either 'p_taking', 'l_learning' or 'ca_with_parent'
+        :param selection_weighting: This determines the strength of the selection (the larger the stronger)
+        :return:
+        """
+
+        pop_log_posteriors = self.get_all_log_posteriors_matrix()
+        fitness_per_agent = np.ones(self.size)
+
+        for a in range(self.size):
+            learner_log_posteriors = pop_log_posteriors[a]
+            learner_log_posteriors_split_on_p_hyps = np.array(np.split(learner_log_posteriors, len(self.perspective_hyps)))
+            learner = self.population[a]
+            parent_index = int(parent_index_per_learner[a])
+            if len(parents) == 0:
+                parent = learner
+            else:
+                parent = parents[parent_index]
+
+            if selection_type == 'p_taking':
+                parent_perspective = parent.perspective
+                parent_p_index = np.where(self.perspective_hyps == parent_perspective)[0][0]
+                p_log_posteriors = learner_log_posteriors_split_on_p_hyps[parent_p_index, :]
+                learner_fitness = np.exp(logsumexp(p_log_posteriors))
+                fitness_per_agent[a] = learner_fitness
+
+            elif selection_type == 'l_learning':
+                parent_lex_index = int(parent_lex_indices[a])
+                l_log_posteriors = learner_log_posteriors_split_on_p_hyps[:, parent_lex_index]
+                learner_fitness = np.exp(logsumexp(l_log_posteriors))
+                fitness_per_agent[a] = learner_fitness
+
+            elif selection_type == 'ca_with_parent':
+                if self.pragmatic_level_initial_pop == 'literal' or self.pragmatic_level_initial_pop == 'perspective-taking' and learner.pragmatic_level == 'literal' or learner.pragmatic_level == 'perspective-taking':
+                    learner_fitness = self.calc_comm_acc(communication_type_initial_pop, ca_measure_type_initial_pop, n_interactions, parent, learner)
+                elif self.pragmatic_level_mutants == 'prag' and learner.pragmatic_level == 'prag':
+                    learner_fitness = self.calc_comm_acc(communication_type_mutants, ca_measure_type_mutants, n_interactions, parent, learner)
+                fitness_per_agent[a] = learner_fitness
+
+        return fitness_per_agent
+
+
+
+
+
+
+
     def insert_mutant(self, context_generation, helpful_contexts, n_signals, error, turnover_type, selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, teacher_type, n_mutants):
-    # def pop_update(self, dataset_array_pickle_file_name, log_likelihood_pickle_file_name, recording, context_generation, helpful_contexts, n_meanings, n_signals, error, turnover_type, selection_type, selection_weighting, communication_type, ca_measure_type, n_interactions, teacher_type, perspectives_per_agent=None):
         """
         :param turnover_type: 'chain' for one agent at a time, or 'whole_pop' for the whole population at once
         :return: Doesn't return anything, but changes self.population to the new population
@@ -1540,13 +1568,11 @@ class MixedPopulation(Population):
         self.parent_lex_indices = np.zeros(self.size)
         for a in range(self.size):
             parent_index = self.parent_index_per_learner[a]
-            parent = self.population[parent_index]
             self.parent_lex_indices[a] = self.lex_indices_per_agent[parent_index]
         selected_hyp_per_agent_matrix = np.zeros(n_agents_to_be_replaced)
-        # normalized_log_posteriors_per_data_point_per_agent_matrix = np.zeros((n_agents_to_be_replaced, (self.n_contexts+1), len(self.hypothesis_space)))
         normalized_log_posteriors_per_agent_matrix = np.zeros((n_agents_to_be_replaced, len(self.hypothesis_space)))
         for i in range(n_agents_to_be_replaced):
-            # 1.2) We choose the new agent's perspective and learning_type with uniform probability from the attributes self.perspective_probs and self.learning_probs:
+            # 1.2) Then we choose the new agent's perspective and learning_type with uniform probability from the attributes self.perspective_probs and self.learning_probs:
             new_agent_perspective = np.random.choice(self.perspectives, size=1, p=self.perspective_probs)
             new_agent_learning_type = np.random.choice(self.learning_types, size=1, p=self.learning_type_probs)
             new_agent_lexicon = Lexicon('empty_lex', self.n_meanings, self.n_signals)
@@ -1572,15 +1598,13 @@ class MixedPopulation(Population):
             agent_data = data_per_agent[i]
 
             # 1.5) We subsequently let the new agent learn from the annotated_pop_data of the population and update its lexicon accordingly:
-
-
             normalized_log_posteriors_per_agent_matrix[i] = new_agent.inference_on_signal_counts_data(agent_data, error)
 
             selected_hyp, selected_lex_hyp = new_agent.update_lexicon()
             selected_hyp_per_agent_matrix[i] = selected_hyp
             self.lex_indices_per_agent[i] = selected_lex_hyp
 
-            # 1.6) Then, we remove the oldest agent (i.e. agent with index 0) from the population, and append the new agent at the end:
+            # 1.6) Then, we remove the oldest agent (c.e. agent with index 0) from the population, and append the new agent at the end:
             self.population = np.delete(self.population, 0)
             self.population = np.append(self.population, new_agent)  # Appends the new agent to the end of the population
             self.perspectives_per_agent = np.delete(self.perspectives_per_agent, 0)
@@ -1600,7 +1624,6 @@ class MixedPopulation(Population):
 
 
     def pop_update(self, context_generation, helpful_contexts, n_meanings, n_signals, error, turnover_type, selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, teacher_type, perspectives_per_agent=None, decoupled=None):
-    # def pop_update(self, dataset_array_pickle_file_name, log_likelihood_pickle_file_name, recording, context_generation, helpful_contexts, n_meanings, n_signals, error, turnover_type, selection_type, selection_weighting, communication_type, ca_measure_type, n_interactions, teacher_type, perspectives_per_agent=None):
         """
         :param turnover_type: 'chain' for one agent at a time, or 'whole_pop' for the whole population at once
         :return: Doesn't return anything, but changes self.population to the new population
@@ -1609,15 +1632,6 @@ class MixedPopulation(Population):
         pragmatic_level_per_agent = ['' for a in range(self.size)]
 
         parent_fitness_array = self.calc_fitness(selection_type, selection_weighting, communication_type_initial_pop, ca_measure_type_initial_pop, communication_type_mutants, ca_measure_type_mutants, n_interactions, self.population, self.parent_index_per_learner, self.parent_generation, self.parent_lex_indices)
-
-        print ''
-        print ''
-        print 'This is the pop_update() method of the MixedPopulation class:'
-        print ''
-        print "parent_fitness_array is:"
-        print parent_fitness_array
-        print "len(parent_fitness_array) is:"
-        print len(parent_fitness_array)
 
         avg_fitness = np.mean(parent_fitness_array)
 
@@ -1628,12 +1642,6 @@ class MixedPopulation(Population):
             parent_fitness_array_weighted_exp = np.exp(parent_fitness_array_weighted)
             parent_probs = np.divide(parent_fitness_array_weighted_exp, np.sum(parent_fitness_array_weighted_exp))
 
-        print ''
-        print parent_probs
-        print "parent_probs are:"
-        print np.sum(parent_probs)
-        print "np.sum(parent_probs) is:"
-
         if turnover_type == 'chain':
             n_agents_to_be_replaced = 1
         elif turnover_type == 'whole_pop':
@@ -1642,8 +1650,16 @@ class MixedPopulation(Population):
         # 1) For the number of agents that need to be replaced in the population, we do the following:
         # FIXME: Figure out why the prior and posterior of ALL agents is updated in the chain method, when it should update only those of the new agent
 
+        # 1.1) First we generate a list of biological parents in case the decoupled parameter (which decouples biological from cultural inheritance) is set to True:
+        if decoupled == True:
+            bio_parent_per_learner = np.random.choice(self.population, size=n_agents_to_be_replaced, p=parent_probs)
+        else:
+            bio_parent_per_learner = self.population[self.parent_index_per_learner]
+        pragmatic_level_bio_parent_per_learner = [bio_parent.pragmatic_level for bio_parent in bio_parent_per_learner]
+        optimality_alpha_bio_parent_per_learner = [bio_parent.optimality_alpha for bio_parent in bio_parent_per_learner]
+
+        # 1.2) Then we generate data_dict from the current population:
         data_per_agent = []
-        # 1.1) First we generate data_dict from the current population:
         for i in range(n_agents_to_be_replaced):
             if self.context_generation == 'random':
                 context_matrix = gen_context_matrix(self.context_type, self.n_meanings, self.context_size, self.n_contexts)
@@ -1653,10 +1669,12 @@ class MixedPopulation(Population):
                 context_matrix = gen_helpful_context_matrix_fixed_order(self.n_meanings, self.n_contexts, self.helpful_contexts)
 
             speaker_order = create_speaker_order_iteration(self, selection_type, parent_probs, teacher_type, self.n_contexts)
+
             if len(speaker_order) > 0:
                 self.parent_index_per_learner[i] = speaker_order[0].id
             else:
                 self.parent_index_per_learner[i] = 0
+
             if context_generation == 'random':
                 old_pop_data = self.produce_pop_data(context_matrix, self.n_utterances, speaker_order)
             elif context_generation == 'optimal':
@@ -1668,44 +1686,29 @@ class MixedPopulation(Population):
             parent_index = self.parent_index_per_learner[a]
             self.parent_lex_indices[a] = self.lex_indices_per_agent[parent_index]
         selected_hyp_per_agent_matrix = np.zeros(n_agents_to_be_replaced)
-        # normalized_log_posteriors_per_data_point_per_agent_matrix = np.zeros((n_agents_to_be_replaced, (self.n_contexts+1), len(self.hypothesis_space)))
         normalized_log_posteriors_per_agent_matrix = np.zeros((n_agents_to_be_replaced, len(self.hypothesis_space)))
-        for i in range(n_agents_to_be_replaced):
-            # 1.2) We choose the new agent's perspective and learning_type with uniform probability from the attributes self.perspective_probs and self.learning_probs:
 
+        for i in range(n_agents_to_be_replaced):
+            # 1.3) We choose the new agent's perspective and learning_type with uniform probability from the attributes self.perspective_probs and self.learning_probs:
             new_agent_perspective = np.random.choice(self.perspectives, size=1, p=self.perspective_probs)
             new_agent_learning_type = np.random.choice(self.learning_types, size=1, p=self.learning_type_probs)
             new_agent_lexicon = Lexicon('empty_lex', self.n_meanings, self.n_signals)
 
-            # 1.3) Then we initialize the new agent with that perspective and learning_type and with an empty lexicon
+            # 1.4) Then we initialize the new agent with that perspective and learning_type and with an empty lexicon
             #FIXME: Again: the new agent is initialized with attributes that are globally defined in the params_and_run module ()
             perspective_prior = prior.create_perspective_prior(self.perspective_hyps, self.lexicon_hyps, self.perspective_prior_type, self.learner_perspective, self.perspective_prior_strength)
             lexicon_prior = prior.create_lexicon_prior(self.lexicon_hyps, self.lexicon_prior_type, self.lexicon_prior_strength, self.error)
             composite_log_priors = prior.list_composite_log_priors(self.agent_type, self.size, self.hypothesis_space, self.perspective_hyps, self.lexicon_hyps, perspective_prior, lexicon_prior)
 
-            parent_index = self.parent_index_per_learner[i]
-            parent = self.population[parent_index]
-
-            print "parent (cultural) is:"
-            print parent
-
-            if decoupled == False:
-                bio_parent = parent
-
-            elif decoupled == True:
-                bio_parent = np.random.choice(self.population, p=parent_probs)
-                print "bio_parent is:"
-                print bio_parent
-
-            if bio_parent.pragmatic_level == 'literal' or bio_parent.pragmatic_level == 'perspective-taking':
+            if pragmatic_level_bio_parent_per_learner[i] == 'literal' or pragmatic_level_bio_parent_per_learner[i] == 'perspective-taking':
                 new_agent = Agent(self.perspective_hyps, self.lexicon_hyps, composite_log_priors, composite_log_priors, new_agent_perspective[0], self.sal_alpha, new_agent_lexicon, new_agent_learning_type[0])
-            elif bio_parent.pragmatic_level == 'prag':
-                new_agent = PragmaticAgent(self.perspective_hyps, self.lexicon_hyps, composite_log_priors, composite_log_priors, new_agent_perspective[0], self.sal_alpha, new_agent_lexicon, new_agent_learning_type[0], bio_parent.pragmatic_level, bio_parent.pragmatic_level, bio_parent.optimality_alpha, self.extra_error)
+            elif pragmatic_level_bio_parent_per_learner[i] == 'prag':
+                new_agent = PragmaticAgent(self.perspective_hyps, self.lexicon_hyps, composite_log_priors, composite_log_priors, new_agent_perspective[0], self.sal_alpha, new_agent_lexicon, new_agent_learning_type[0], pragmatic_level_bio_parent_per_learner[i], pragmatic_level_bio_parent_per_learner[i], optimality_alpha_bio_parent_per_learner[i], self.extra_error)
 
-            # 1.4) Then we get the new agent's parent data from the old population:
+            # 1.5) Then we get the new agent's parent data from the old population:
             agent_data = data_per_agent[i]
 
-            # 1.5) We subsequently let the new agent learn from the annotated_pop_data of the population and update its lexicon accordingly:
+            # 1.6) We subsequently let the new agent learn from the annotated_pop_data of the population and update its lexicon accordingly:
 
 
             normalized_log_posteriors_per_agent_matrix[i] = new_agent.inference_on_signal_counts_data(agent_data, error)
@@ -1715,7 +1718,7 @@ class MixedPopulation(Population):
             self.lex_indices_per_agent[i] = selected_lex_hyp
 
 
-            # 1.6) Then, we remove the oldest agent (i.e. agent with index 0) from the population, and append the new agent at the end:
+            # 1.7) Then, we remove the oldest agent (c.e. agent with index 0) from the population, and append the new agent at the end:
             self.population = np.delete(self.population, 0)
             self.population = np.append(self.population, new_agent)  # Appends the new agent to the end of the population
             self.perspectives_per_agent = np.delete(self.perspectives_per_agent, 0)
@@ -1725,13 +1728,11 @@ class MixedPopulation(Population):
             self.learning_types_per_agent = np.delete(self.learning_types_per_agent, 0)
             self.learning_types_per_agent = np.append(self.population, new_agent.learning_type)
 
-        # 1.7) Finally, the agent id numbers are updated:
+        # 1.8) Finally, the agent id numbers are updated:
         for i in range(self.size):
             agent = self.population[i]
             agent.id = i
             pragmatic_level_per_agent[i] = agent.pragmatic_level
-
-
 
         return selected_hyp_per_agent_matrix, avg_fitness, parent_probs, self.parent_index_per_learner, self.parent_lex_indices, pragmatic_level_per_agent
 
@@ -1909,7 +1910,7 @@ class DistinctionPopulation(Population):
             selected_hyp_per_agent_matrix[i] = selected_hyp
             self.lex_indices_per_agent[i] = selected_lex_hyp
 
-            # 1.6) Then we remove the oldest agent (i.e. agent with index 0) from the population, and append the new agent at the end:
+            # 1.6) Then we remove the oldest agent (c.e. agent with index 0) from the population, and append the new agent at the end:
             self.population = np.delete(self.population, 0)
             self.population = np.append(self.population, new_agent)  # Appends the new agent to the end of the population
             self.perspectives_per_agent = np.delete(self.perspectives_per_agent, 0)

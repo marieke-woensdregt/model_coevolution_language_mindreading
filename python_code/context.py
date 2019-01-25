@@ -48,9 +48,9 @@ def gen_context_matrix(context_type, n_meanings, context_size, n_contexts):
     """
     context_matrix = np.zeros((n_contexts, n_meanings))
     # if context_type == 'absolute':
-    #     for i in range(n_contexts):
+    #     for c in range(n_contexts):
     #         context = gen_context_abs(n_meanings, context_size)
-    #         context_matrix[i] = context
+    #         context_matrix[c] = context
     # elif context_type == 'continuous':
 
     for i in range(n_contexts):
@@ -129,7 +129,7 @@ def calc_intention(agent_perspective, context, alpha):
     """
     :param agent_perspective: The perspective of the agent for whom we want to calculate the intention distribution (can be self.perspective or that of another agent) (float)
     :param context: The context for which we want to calculate the intention distribution given agent_perspective (1D numpy array)
-    :return: The intention distribution (i.e. probability of choosing meanings as topic meaning) given agent_perspective and context (1D numpy array) (This is simply a normalized version of the saliency array.)
+    :return: The intention distribution (c.e. probability of choosing meanings as topic meaning) given agent_perspective and context (1D numpy array) (This is simply a normalized version of the saliency array.)
     """
     saliencies = calc_saliencies(agent_perspective, context, alpha)
     intention = np.divide(saliencies, np.sum(saliencies))
@@ -137,29 +137,83 @@ def calc_intention(agent_perspective, context, alpha):
 
 
 def context_informativeness(context_matrix, perspectives, alpha):
+    print ''
+    print ''
+    print ''
+    print 'This is the context_informativeness() function'
+    print "context_matrix is:"
+    print context_matrix
+    print "context_matrix.shape is:"
+    print context_matrix.shape
     if len(perspectives) > 2:
         print 'Sorry, this function only works for 2 perspectives.'
     context_informativeness_array = np.zeros(len(context_matrix))
     for c in range(len(context_matrix)):
+        print ''
+        print ''
+        print ''
+        print "c is:"
+        print c
         context = context_matrix[c]
+        print "context is:"
+        print context
         n_m_combinations = np.divide(factorial(len(context)), (factorial(2) * factorial(len(context) - 2)))
+        print "n_m_combinations is:"
+        print n_m_combinations
         m_ratios_per_perspective = np.zeros((len(perspectives), n_m_combinations))
         for p in range(len(perspectives)):
+            print "p is:"
+            print p
             perspective = perspectives[p]
+            print "perspective is:"
+            print perspective
             p_intention = calc_intention(perspective, context, alpha)
+            print "p_intention is:"
+            print p_intention
             m_combinations = list(itertools.combinations(p_intention, 2))
+            print "m_combinations is:"
+            print m_combinations
             for m in range(len(m_combinations)):
+                print "m is:"
+                print m
                 m_combi = m_combinations[m]
                 if len(context) == 2 and p == 1:
                     m_combi = m_combi[::-1]
+                print "m_combi is:"
+                print m_combi
                 ratio = np.divide(m_combi[0], m_combi[1])
+                print "ratio is:"
+                print ratio
                 m_ratios_per_perspective[p][m] = ratio
+        print "m_ratios_per_perspective is:"
+        print m_ratios_per_perspective
+        print "m_ratios_per_perspective.shape is:"
+        print m_ratios_per_perspective.shape
         r_diff_array = np.zeros((len(m_ratios_per_perspective[0]), len(m_ratios_per_perspective[0])))
         for i in range(len(m_ratios_per_perspective[0])):
+            print ''
+            print "c is:"
+            print i
+            print "m_ratios_per_perspective[0] is:"
+            print m_ratios_per_perspective[0]
+            print "m_ratios_per_perspective[1] is:"
+            print m_ratios_per_perspective[1]
+            print "np.absolute(np.subtract(m_ratios_per_perspective[0], m_ratios_per_perspective[1])) is:"
+            print np.absolute(np.subtract(m_ratios_per_perspective[0], m_ratios_per_perspective[1]))
             r_diff_array[i] = np.absolute(np.subtract(m_ratios_per_perspective[0], m_ratios_per_perspective[1]))
+            print "r_diff_array[c] is:"
+            print r_diff_array[i]
             m_ratios_per_perspective[1] = np.roll(m_ratios_per_perspective[1], 1)
+            print "m_ratios_per_perspective[1] is:"
+            print m_ratios_per_perspective[1]
         sum_diff = np.sum(r_diff_array.flatten())
+        print "sum_diff is:"
+        print sum_diff
         context_informativeness_array[c] = sum_diff
+    print "context_informativeness_array is:"
+    print context_informativeness_array
+    print "context_informativeness_array.shape is:"
+    print context_informativeness_array.shape
     return context_informativeness_array
 
 
@@ -188,18 +242,16 @@ def calc_most_informative_contexts(n_meanings, perspectives, alpha):
 
 
 
-# n_meanings = 4
-# perspectives = np.array([0., 1.])
-# sal_alpha = 1.
-#
-# most_informative_contexts, second_most_informative_contexts = calc_most_informative_contexts(n_meanings, perspectives, sal_alpha)
-# print ''
-# print ''
-# print "most_informative_contexts are:"
-# print most_informative_contexts
-# print ''
-# print ''
-# print "second_most_informative_contexts are:"
-# print second_most_informative_contexts
-#
+if __name__ == "__main__":
+
+
+    n_meanings = 3
+    perspectives = np.array([0., 1.])
+    sal_alpha = 1.
+
+    most_informative_contexts, second_most_informative_contexts = calc_most_informative_contexts(n_meanings, perspectives, sal_alpha)
+    print ''
+    print ''
+    print "most_informative_contexts are:"
+    print most_informative_contexts
 

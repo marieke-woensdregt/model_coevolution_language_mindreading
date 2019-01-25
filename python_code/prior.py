@@ -1,7 +1,7 @@
 __author__ = 'Marieke Woensdregt'
 
 import numpy as np
-from scipy.special import logsumexp
+from scipy.misc import logsumexp
 import string
 
 
@@ -158,7 +158,7 @@ def list_composite_log_priors(agent_type, pop_size, hypothesis_space, perspectiv
     :param hypothesis_space: The full space of composite hypotheses (2D numpy matrix)
     :param perspective_prior: The prior probability distribution over perspective hypotheses (1D numpy array)
     :param lexicon_prior: The prior probability distribution over lexicon hypotheses (1D numpy array)
-    :return: A 1D numpy array that contains the LOG prior for each composite hypothesis (i.e. log(perspective_prior*lexicon_prior))
+    :return: A 1D numpy array that contains the LOG prior for each composite hypothesis (c.e. log(perspective_prior*lexicon_prior))
     """
     priors = np.zeros(len(hypothesis_space))
     counter = 0
@@ -191,7 +191,7 @@ def list_composite_log_priors_with_speaker_distinction(hypothesis_space, perspec
     :param perspective_prior: The prior probability distribution over perspective hypotheses (1D numpy array)
     :param lexicon_prior: The prior probability distribution over lexicon hypotheses (1D numpy array)
     :param n_speakers: The number of speakers
-    :return: A 1D numpy array that contains the LOG prior for each composite hypothesis (i.e. log(perspective_prior*lexicon_prior))
+    :return: A 1D numpy array that contains the LOG prior for each composite hypothesis (c.e. log(perspective_prior*lexicon_prior))
     """
     n_perspective_combinations = np.power(len(perspective_hyps), n_speakers)
     n_composite_hyp_combinations = n_perspective_combinations*len(lexicon_hyps)
